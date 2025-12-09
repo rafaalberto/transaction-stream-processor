@@ -15,10 +15,6 @@
 .gradle/
 build/
 
-# Local build files
-!gradle/wrapper/gradle-wrapper.jar
-!gradle/wrapper/gradle-wrapper.properties
-
 # OS-specific files
 .DS_Store
 Thumbs.db
@@ -45,6 +41,9 @@ logs/
 *.war
 *.nar
 *.ear
+
+# Exception: Gradle wrapper JAR must be committed
+!gradle/wrapper/gradle-wrapper.jar
 
 # ---------------------------------------
 # Environment / sensitive
