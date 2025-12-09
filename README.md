@@ -1,5 +1,6 @@
 # 🚀 Transaction Stream Processor
 
+[![CI](https://github.com/rafaalberto/transaction-stream-processor/actions/workflows/ci.yml/badge.svg)](https://github.com/rafaalberto/transaction-stream-processor/actions/workflows/ci.yml)
 ![Java](https://img.shields.io/badge/Java-21-orange)
 ![Build](https://img.shields.io/badge/Build-Gradle-02303A.svg?logo=gradle)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
