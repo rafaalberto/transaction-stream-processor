@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "io.rafaalberto"
-version = "0.0.1-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 description = "Event-driven transaction processor using Kafka, clean architecture and atomic operations."
 
 java {
