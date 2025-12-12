@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+    <property name="charset" value="UTF-8"/>
+    <property name="fileExtensions" value="java"/>
+    
+    <!-- Suppression filter for acceptable violations -->
+    <module name="SuppressionFilter">
+        <property name="file" value="${config_loc}/suppressions.xml"/>
+        <property name="optional" value="false"/>
+    </module>
+
+    <!-- File-level checks (Spotless handles formatting, but we check basics) -->
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+    </module>
+    <module name="NewlineAtEndOfFile"/>
+    <module name="LineLength">
+        <property name="max" value="120"/>
+    </module>
+
+    <!-- TreeWalker for AST-based checks -->
+    <module name="TreeWalker">
+
+        <!-- Import checks -->
+        <module name="AvoidStarImport"/>
+        <module name="UnusedImports"/>
+
+        <!-- Naming conventions -->
+        <module name="TypeName"/>
+        <module name="MethodName"/>
+        <module name="ParameterName"/>
+        <module name="LocalVariableName"/>
+        <module name="MemberName"/>
+        <module name="ConstantName"/>
+        <module name="StaticVariableName"/>
+
+        <!-- Modifier checks (compatible with Google Java Format) -->
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+
+        <!-- Complexity checks -->
+        <module name="CyclomaticComplexity">
+            <property name="max" value="12"/>
+        </module>
+        <module name="MethodLength">
+            <property name="max" value="120"/>
+        </module>
+        <module name="NestedIfDepth">
+            <property name="max" value="3"/>
+        </module>
+        <module name="NPathComplexity">
+            <property name="max" value="200"/>
+        </module>
+        <module name="ExecutableStatementCount">
+            <property name="max" value="60"/>
+        </module>
+        <module name="ClassFanOutComplexity">
+            <property name="max" value="20"/>
+        </module>
+        <module name="NestedTryDepth">
+            <property name="max" value="2"/>
+        </module>
+        <module name="ReturnCount">
+            <property name="max" value="4"/>
+        </module>
+        <module name="BooleanExpressionComplexity">
+            <property name="max" value="5"/>
+        </module>
+
+        <!-- Documentation (public API only) -->
+        <module name="JavadocType">
+            <property name="scope" value="public"/>
+        </module>
+
+        <!-- Code quality checks -->
+        <!--
+            FinalParameters: Enforces final keyword on method and constructor parameters.
+            
+            Rationale:
+            - Prevents accidental parameter reassignment, reducing bugs
+            - Makes code intent explicit: parameters are immutable within the method
+            - Improves readability by clearly distinguishing parameters from local variables
+            - Aligns with functional programming principles and immutability best practices
+            - Common practice in enterprise Java codebases (e.g., Google Java Style Guide)
+            
+            This rule applies to all methods and constructors, ensuring consistent
+            code quality across the codebase. For portfolio projects, this demonstrates
+            attention to defensive programming and code safety.
+        -->
+        <module name="FinalParameters"/>
+        <module name="EmptyBlock">
+            <property name="option" value="TEXT"/>
+        </module>
+        <module name="EmptyStatement"/>
+        <module name="MultipleVariableDeclarations"/>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="SimplifyBooleanReturn"/>
+        <module name="StringLiteralEquality"/>
+
+        <!-- Code comments -->
+        <module name="TodoComment">
+            <property name="format" value="(?i)\b(TODO|FIXME|XXX|HACK)\b"/>
+        </module>
+
+    </module>
+
+    <!-- File size limit -->
+    <module name="FileLength">
+        <property name="max" value="3000"/>
+    </module>
+
+</module>

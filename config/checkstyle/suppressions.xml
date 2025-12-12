@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<!--
+    Suppressions for Checkstyle violations that are acceptable in specific contexts.
+
+    Integration tests often require many imports to test the full system,
+    so ClassFanOutComplexity is relaxed for test files.
+-->
+
+<suppressions>
+    <!-- Suppress ClassFanOutComplexity for all test files -->
+    <!-- Integration tests legitimately need many dependencies to test the full system -->
+    <suppress
+        files=".*Test\.java$"
+        checks="ClassFanOutComplexity"
+    />
+
+    <!-- Alternative: If you want to be more specific, you can target specific files -->
+    <!--
+    <suppress
+        files="TransactionConcurrencyIntegrationTest\.java"
+        checks="ClassFanOutComplexity"
+    />
+    -->
+</suppressions>

@@ -1,6 +1,7 @@
 # 🚀 Transaction Stream Processor
 
-[![CI](https://github.com/rafaalberto/transaction-stream-processor/actions/workflows/ci.yml/badge.svg)](https://github.com/rafaalberto/transaction-stream-processor/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/rafaalberto/transaction-stream-processor/ci.yml?label=CI&logo=githubactions&logoColor=white)](https://github.com/rafaalberto/transaction-stream-processor/actions/workflows/ci.yml)
+[![Quality Gate](https://img.shields.io/github/actions/workflow/status/rafaalberto/transaction-stream-processor/ci.yml?label=Quality%20Gate&logo=checkmarx&logoColor=white)](https://github.com/rafaalberto/transaction-stream-processor/actions/workflows/ci.yml)
 ![Java](https://img.shields.io/badge/Java-21-orange)
 ![Build](https://img.shields.io/badge/Build-Gradle-02303A.svg?logo=gradle)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -89,6 +90,62 @@ These are not part of the service but illustrate event propagation:
 - **Clean Architecture** (planned)
 - **Docker / Docker Compose** (planned)
 - **JUnit + Testcontainers** (planned)
+
+---
+
+# 🧪 Running Tests
+
+```
+./gradlew test
+./gradlew integrationTest
+```
+
+---
+
+# 🔍 Code Quality — Quick Reference
+
+This project includes a lightweight, production-style quality pipeline designed to keep the codebase clean, safe, and maintainable.
+
+## 🚀 Why This Matters
+Linting enforces:
+
+- Consistent formatting
+- Safe coding patterns
+- Reduced complexity
+- High maintainability
+
+These practices reflect standards used in fintech and high-availability backend systems.
+
+## ⚙️ Tools
+- **Spotless** — formatting (Google Java Style)
+- **Checkstyle** — static analysis & best practices
+- **EditorConfig** — editor-agnostic consistency
+
+## 🧭 Most Important Commands
+
+**Format code (auto-fix)**
+```
+./gradlew spotlessApply
+```
+
+**Verify formatting**
+```
+./gradlew spotlessCheck
+```
+
+**Run static analysis**
+```
+./gradlew checkstyleMain checkstyleTest
+```
+
+**Full quality gate (CI equivalent)**
+```
+./gradlew check
+```
+
+## 📊 Reports
+- Checkstyle: `build/reports/checkstyle/checkstyle.html`
+- Tests: `build/reports/tests/`
 
 ---
 
