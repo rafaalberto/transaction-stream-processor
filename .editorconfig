@@ -1,0 +1,90 @@
+# Root EditorConfig file for consistent style across editors
+root = true
+
+# ============================================
+# Global defaults (apply to all files)
+# ============================================
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# ============================================
+# Java (Java 17/21+ style)
+# ============================================
+[*.java]
+indent_style = space
+indent_size = 4
+continuation_indent_size = 8
+max_line_length = 120
+tab_width = 4
+
+# IntelliJ-specific hints (helpful when using IntelliJ)
+# Note: Spotless / Checkstyle do NOT read these; they are IDE directives.
+ij_continuation_indent_for_chained_methods = true
+ij_continuation_indent_for_binary_operations = true
+ij_continuation_indent_for_expressions = true
+
+# Import / on-demand thresholds (IntelliJ only)
+ij_java_imports_layout = java,javax,*,org,com,blank,#
+ij_java_class_count_to_use_import_on_demand = 9999
+ij_java_names_count_to_use_import_on_demand = 9999
+
+# Keep text block breaks (useful for Java text blocks)
+ij_java_keep_line_breaks = true
+
+# Spaces around control statements (IntelliJ hints)
+ij_java_space_before_if_parentheses = true
+ij_java_space_before_for_parentheses = true
+ij_java_space_before_while_parentheses = true
+ij_java_space_before_switch_parentheses = true
+
+# Disable aggressive wrapping inside records/pattern matching (IntelliJ hint)
+ij_java_wrap_long_lines = false
+
+# ============================================
+# Gradle / build files
+# ============================================
+[*.gradle]
+indent_style = space
+indent_size = 4
+
+[*.gradle.kts]
+indent_style = space
+indent_size = 4
+
+# ============================================
+# JSON / YAML
+# ============================================
+[*.json]
+indent_size = 2
+
+[*.yml]
+indent_size = 2
+
+[*.yaml]
+indent_size = 2
+
+# ============================================
+# Markdown
+# ============================================
+[*.md]
+max_line_length = off
+trim_trailing_whitespace = false
+
+# ============================================
+# XML / HTML
+# ============================================
+[*.xml]
+indent_size = 2
+
+[*.html]
+indent_size = 2
+
+# ============================================
+# Properties files
+# ============================================
+[*.properties]
+indent_style = space
+indent_size = 2
