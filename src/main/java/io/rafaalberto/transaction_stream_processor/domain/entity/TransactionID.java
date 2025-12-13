@@ -9,7 +9,7 @@ public record TransactionID(UUID value) {
     Objects.requireNonNull(value, "TransactionID value cannot be null");
   }
 
-  public static TransactionID random() {
-    return new TransactionID(UUID.randomUUID());
-  }
+  //  public static TransactionID random() {
+  //    return new TransactionID(UUID.randomUUID());
+  //  }
 }
