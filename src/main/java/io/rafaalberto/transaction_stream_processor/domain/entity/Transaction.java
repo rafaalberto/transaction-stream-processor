@@ -18,21 +18,25 @@ public final class Transaction {
     validate();
   }
 
-  public TransactionID getId() {
+  public TransactionID id() {
     return id;
   }
 
-  public BigDecimal getAmount() {
+  public BigDecimal amount() {
     return amount;
   }
 
-  public Instant getOccurredAt() {
+  public Instant occurredAt() {
     return occurredAt;
   }
 
   private void validate() {
+    validateAmount();
+  }
+
+  private void validateAmount() {
     if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-      throw new InvalidTransactionException("Transaction amount must be greater than zero");
+      throw new InvalidTransactionException("Transaction amount must be positive");
     }
   }
 }
