@@ -1,9 +1,9 @@
-package io.rafaalberto.transaction_stream_processor.unit.domain.entity;
+package io.rafaalberto.transactionstreamprocessor.unit.domain.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.rafaalberto.transaction_stream_processor.domain.entity.TransactionID;
+import io.rafaalberto.transactionstreamprocessor.domain.entity.TransactionID;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package io.rafaalberto.transaction_stream_processor;
+package io.rafaalberto.transactionstreamprocessor;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
