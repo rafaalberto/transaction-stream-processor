@@ -1,6 +1,6 @@
-package io.rafaalberto.transaction_stream_processor.domain.entity;
+package io.rafaalberto.transactionstreamprocessor.domain.entity;
 
-import io.rafaalberto.transaction_stream_processor.domain.exception.InvalidTransactionException;
+import io.rafaalberto.transactionstreamprocessor.domain.exception.InvalidTransactionException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;

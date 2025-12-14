@@ -1,4 +1,4 @@
-package io.rafaalberto.transaction_stream_processor;
+package io.rafaalberto.transactionstreamprocessor;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

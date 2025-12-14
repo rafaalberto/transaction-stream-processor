@@ -1,11 +1,11 @@
-package io.rafaalberto.transaction_stream_processor.unit.domain.entity;
+package io.rafaalberto.transactionstreamprocessor.unit.domain.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.rafaalberto.transaction_stream_processor.domain.entity.Transaction;
-import io.rafaalberto.transaction_stream_processor.domain.entity.TransactionID;
-import io.rafaalberto.transaction_stream_processor.domain.exception.InvalidTransactionException;
+import io.rafaalberto.transactionstreamprocessor.domain.entity.Transaction;
+import io.rafaalberto.transactionstreamprocessor.domain.entity.TransactionID;
+import io.rafaalberto.transactionstreamprocessor.domain.exception.InvalidTransactionException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.HashSet;
