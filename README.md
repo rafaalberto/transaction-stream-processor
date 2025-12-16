@@ -13,16 +13,17 @@
 **Transaction Stream Processor** is an event-driven microservice designed to ingest, validate, and process financial transactions in real time.  
 It demonstrates modern distributed-systems concepts used in fintech environments, including:
 
-- Event-driven architecture
-- Apache Kafka producers and consumers
-- Clean Architecture & modular design
-- Transaction persistence
-- Dead-letter queue (DLQ) handling
-- Outbox-style *“persist + publish”* atomic workflow
+- **Clean Architecture** & Domain-Driven Design (DDD) principles
+- Framework-agnostic domain and application layers
+- Event-driven architecture (planned)
+- Apache Kafka producers and consumers (planned)
+- Transaction persistence (planned)
+- Dead-letter queue (DLQ) handling (planned)
+- Outbox-style *"persist + publish"* atomic workflow (planned)
 
 This repository is part of my public portfolio and reflects practical experience gained from real-world financial systems.
 
-> 🛠 **Note:** This project is a **work in progress**. New modules, tests, diagrams, and documentation will be added over time.
+> 🛠 **Note:** This project is a **work in progress**. Currently implementing the core architecture with no-framework code. Spring Boot, Kafka, and persistence layers will be added next.
 
 ---
 
@@ -31,22 +32,41 @@ This repository is part of my public portfolio and reflects practical experience
 This service focuses specifically on **transaction ingestion and processing**, not balance calculations.  
 Its core responsibilities include:
 
-### ✔ **1. Ingesting external transaction requests**
-A REST API receives incoming transactions and immediately publishes them to the Kafka topic `TRANSACTIONS.EVENTS`.
+### ✅ **Currently Implemented**
 
-### ✔ **2. Processing events asynchronously**
-A processing module consumes these events, executes validation rules, and determines the transaction’s outcome.
+**1. Domain Layer (Core Business Logic)**
+- `Transaction` entity with business rules validation
+- `TransactionID` value object
+- Domain exceptions (`InvalidTransactionException`)
+- Framework-agnostic, pure Java business logic
 
-### ✔ **3. Persisting and publishing results atomically**
-A dedicated handler performs:
+**2. Application Layer (Use Cases)**
+- `CreateTransactionUseCase` - orchestrates transaction creation
+- Command objects (`CreateTransactionCommand`)
+- Clean separation from infrastructure concerns
 
-- transaction persistence
-- publication of a new event `TRANSACTIONS.PROCESSED`
+**3. Infrastructure Layer (HTTP Adapters)**
+- `TransactionController` - HTTP controller structure (ready for Spring integration)
+- Request/Response DTOs (`CreateTransactionRequest`, `TransactionResponse`)
+- No framework dependencies in business logic
+
+### 🔄 **Planned Features**
+
+**1. Ingesting external transaction requests**
+A REST API (with Spring Boot) will receive incoming transactions and publish them to the Kafka topic `TRANSACTIONS.EVENTS`.
+
+**2. Processing events asynchronously**
+A processing module will consume Kafka events, execute validation rules, and determine the transaction's outcome.
+
+**3. Persisting and publishing results atomically**
+A dedicated handler will perform:
+- Transaction persistence (via repository pattern)
+- Publication of a new event `TRANSACTIONS.PROCESSED`
 
 This ensures downstream services can react (Fraud, Notification, Audit, etc.).
 
-### ✔ **4. Handling invalid data safely**
-Invalid transactions are routed to **`TRANSACTIONS.EVENTS.DLQ`** for later investigation.
+**4. Handling invalid data safely**
+Invalid transactions will be routed to **`TRANSACTIONS.EVENTS.DLQ`** for later investigation.
 
 ---
 
@@ -58,38 +78,72 @@ Place your exported diagram in the folder `docs/diagram.png` and reference it li
 
 ---
 
-## 🏗 Project Modules
+## 🏗 Project Structure
 
-### **1. Transaction Ingress Module**
-- Receives external REST requests
-- Publishes raw transaction events
+The project follows **Clean Architecture** principles with clear layer separation:
+
+### **✅ Implemented Layers**
+
+**1. Domain Layer** (`domain/`)
+- Core business entities and value objects
+- Business rules and validation
+- Domain exceptions
+- Zero framework dependencies
+
+**2. Application Layer** (`application/`)
+- Use case implementations
+- Command objects
+- Port interfaces (to be implemented)
+- Orchestrates domain logic
+
+**3. Infrastructure Layer** (`infrastructure/`)
+- HTTP adapters (controllers, DTOs)
+- Ready for Spring Boot integration
+- Will include persistence and messaging adapters
+
+### **🔄 Planned Modules**
+
+**1. Transaction Ingress Module**
+- Spring Boot REST API integration
+- Kafka event publishing
 - Ensures decoupling between API and processing logic
 
-### **2. Transaction Processing Module**
-- Consumes Kafka events
-- Applies validation rules
-- Executes the use case logic
-- Persists transactions
-- Publishes processed events
-- Sends invalid events to the DLQ
+**2. Transaction Processing Module**
+- Kafka event consumers
+- Validation rules execution
+- Use case orchestration
+- Transaction persistence
+- Processed event publishing
+- DLQ handling for invalid transactions
 
-### **3. Downstream Consumers (External)**
+**3. Downstream Consumers (External)**
 These are not part of the service but illustrate event propagation:
 
 - **Notification Service**
 - **Fraud Detection**
 - **Audit Trail Processor**
 
+For detailed architecture documentation, see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ---
 
 ## 🛠 Tech Stack
 
-- **Java 21**
-- **Spring Boot**
-- **Apache Kafka** (planned)
-- **Clean Architecture** (planned)
-- **Docker / Docker Compose** (planned)
-- **JUnit + Testcontainers** (planned)
+### ✅ **Currently Used**
+- **Java 21** - Modern Java features
+- **Gradle** - Build tool
+- **JUnit 5** - Unit testing
+- **AssertJ** - Fluent assertions
+- **Mockito** - Mocking framework
+- **Spotless** - Code formatting
+- **Checkstyle** - Static code analysis
+
+### 🔄 **Planned**
+- **Spring Boot** - Framework integration (dependencies added, integration pending)
+- **Apache Kafka** - Event streaming
+- **JPA / Database** - Transaction persistence
+- **Docker / Docker Compose** - Containerization
+- **Testcontainers** - Integration testing
 
 ---
 
@@ -151,9 +205,20 @@ These practices reflect standards used in fintech and high-availability backend 
 
 ## 📌 Roadmap (WIP)
 
-- [ ] Implement ingress API
+### ✅ **Completed**
+- [x] Clean Architecture structure
+- [x] Domain layer with entities and value objects
+- [x] Application layer with use cases
+- [x] Infrastructure HTTP layer structure
+- [x] Unit tests for domain and application layers
+- [x] Code quality tools (Spotless, Checkstyle)
+
+### 🔄 **In Progress / Planned**
+- [ ] Create output ports (`application/port/output/`)
+- [ ] Integrate Spring Boot with HTTP controllers
+- [ ] Implement repository pattern for persistence
 - [ ] Define Kafka topics and schemas
-- [ ] Implement processing use case
+- [ ] Implement Kafka producers and consumers
 - [ ] Add idempotency strategy
 - [ ] Add DLQ consumer
 - [ ] Add integration tests with Testcontainers
