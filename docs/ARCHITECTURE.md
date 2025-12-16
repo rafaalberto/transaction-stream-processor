@@ -5,36 +5,33 @@ This document describes the folder structure and organization of the Transaction
 ## 📁 Folder Structure
 
 ```
-src/main/java/io/rafaalberto/transaction_stream_processor/
-├── domain/                    # Core business logic (innermost layer)
-│   ├── model/                 # Domain entities and value objects
-│   ├── service/               # Domain services (pure business logic)
-│   └── exception/             # Domain-specific exceptions
+src/main/java/io/rafaalberto/transactionstreamprocessor/
+├── domain/                        # Core business logic (innermost layer)
+│   ├── entity/                    # Domain entities and value objects
+│   └── exception/                 # Domain-specific exceptions
+│   └── service/                   # (planned) Domain services
 │
-├── application/               # Use cases and application logic
-│   ├── usecase/              # Use case implementations
-│   ├── port/                 # Ports (interfaces for adapters)
-│   │   ├── input/            # Input ports (use case interfaces)
-│   │   └── output/           # Output ports (repository, messaging interfaces)
-│   └── dto/                  # Application DTOs (if needed)
+├── application/                   # Use cases and application logic
+│   ├── usecases/                  # Use case implementations
+│   ├── port/                      # (planned) Ports (interfaces for adapters)
+│   │   ├── input/                 # (planned) Input ports (use case interfaces)
+│   │   └── output/                # (planned) Output ports (repository, messaging interfaces)
+│   └── dto/                       # (planned) Application DTOs (if needed)
 │
-├── infrastructure/            # External concerns (outer layer)
-│   ├── persistence/          # Database implementations
-│   │   ├── entity/           # JPA entities (if using JPA)
-│   │   ├── repository/       # Repository implementations
-│   │   └── mapper/           # Entity-Domain mappers
-│   ├── messaging/            # Kafka producers/consumers
-│   │   ├── producer/         # Event producers
-│   │   ├── consumer/         # Event consumers
-│   │   └── config/           # Kafka configuration
-│   └── config/               # Infrastructure configuration
-│
-└── adapter/                   # Interface adapters
-    ├── api/                   # REST controllers
-    │   ├── controller/        # REST endpoints
-    │   ├── dto/               # Request/Response DTOs
-    │   └── mapper/            # DTO-Domain mappers
-    └── messaging/             # Message adapters (if separate from infrastructure)
+└── infrastructure/                # External concerns (outer layer)
+    ├── http/                      # HTTP/REST adapters
+    │   ├── controller/            # HTTP controllers
+    │   ├── request/               # Request DTOs
+    │   └── response/              # Response DTOs
+    ├── persistence/               # (planned) Database implementations
+    │   ├── entity/                # (planned) JPA entities (if using JPA)
+    │   ├── repository/            # (planned) Repository implementations
+    │   └── mapper/                # (planned) Entity-Domain mappers
+    ├── messaging/                 # (planned) Kafka producers/consumers
+    │   ├── producer/              # (planned) Event producers
+    │   ├── consumer/              # (planned) Event consumers
+    │   └── config/                # (planned) Kafka configuration
+    └── config/                    # (planned) Infrastructure configuration
 ```
 
 ## 🎯 Layer Descriptions
@@ -45,8 +42,8 @@ src/main/java/io/rafaalberto/transaction_stream_processor/
 
 **Why this name:**
 - **`domain/`**: Represents the business domain - the heart of your application
-- **`model/`**: Contains domain entities and value objects that represent core business concepts
-- **`service/`**: Contains domain services - business logic that doesn't naturally fit within a single entity
+- **`entity/`**: Contains domain entities and value objects that represent core business concepts
+- **`service/`**: (Planned) Domain services - business logic that doesn't naturally fit within a single entity
 - **`exception/`**: Domain-specific exceptions that represent business rule violations
 
 **Key Principles:**
@@ -55,11 +52,13 @@ src/main/java/io/rafaalberto/transaction_stream_processor/
 - Framework-agnostic code
 - Contains the most stable and reusable code
 
-**Example contents:**
+**Example contents (implemented):**
 - `Transaction` entity
-- `TransactionStatus` value object
-- `TransactionValidator` domain service
+- `TransactionID` value object
 - `InvalidTransactionException` domain exception
+
+**Example contents (planned):**
+- Additional domain services (e.g., `TransactionValidator`)
 
 ---
 
@@ -69,78 +68,68 @@ src/main/java/io/rafaalberto/transaction_stream_processor/
 
 **Why this name:**
 - **`application/`**: Represents the application layer that orchestrates business workflows
-- **`usecase/`**: Contains use case implementations (e.g., `ProcessTransactionUseCase`, `IngestTransactionUseCase`)
-- **`port/`**: Defines interfaces (ports) that the application needs
-  - **`input/`**: Input ports - interfaces that use cases implement (driven by adapters)
-  - **`output/`**: Output ports - interfaces for repositories, messaging, etc. (implemented by infrastructure)
-- **`dto/`**: Application-level DTOs if needed (though prefer domain objects when possible)
+- **`usecases/`**: Contains use case implementations (e.g., `CreateTransactionUseCase`)
+- **`port/`**: (Planned) Defines interfaces (ports) that the application needs
+  - **`input/`**: (Planned) Input ports - interfaces that use cases implement (driven by adapters)
+  - **`output/`**: (Planned) Output ports - interfaces for repositories, messaging, etc. (implemented by infrastructure)
+- **`dto/`**: (Planned) Application-level DTOs if needed (though prefer domain objects when possible)
 
 **Key Principles:**
 - Depends only on `domain/`
-- Defines contracts (ports) that infrastructure must implement
 - Contains orchestration logic, not business rules
 - Business rules stay in `domain/`
 
-**Example contents:**
-- `ProcessTransactionUseCase`
+**Example contents (implemented):**
+- `CreateTransactionUseCase`
+- `CreateTransactionCommand`
+
+**Example contents (planned):**
 - `TransactionRepository` (output port interface)
 - `EventPublisher` (output port interface)
-- `TransactionUseCase` (input port interface)
+- Input port interfaces (e.g., `CreateTransactionUseCase` as an interface)
 
 ---
 
 ### 3. `infrastructure/` - External Concerns (Outer Layer)
 
-**Purpose:** Implements all external dependencies and framework-specific code. This is where you interact with databases, message brokers, file systems, etc.
+**Purpose:** Implements all external dependencies and framework-specific code. This is where you interact with databases, message brokers, HTTP interfaces, file systems, etc.
 
 **Why this name:**
 - **`infrastructure/`**: Represents the technical infrastructure layer
-- **`persistence/`**: Database-related implementations
-  - **`entity/`**: JPA entities (database representation, separate from domain entities)
-  - **`repository/`**: Concrete repository implementations (implements output ports from `application/port/output/`)
-  - **`mapper/`**: Converts between JPA entities and domain entities
-- **`messaging/`**: Kafka-related implementations
-  - **`producer/`**: Event producers that publish to Kafka
-  - **`consumer/`**: Event consumers that process Kafka messages
-  - **`config/`**: Kafka configuration classes
-- **`config/`**: Infrastructure configuration (database config, connection pools, etc.)
+- **`http/`**: HTTP/REST adapters (interface adapters for web APIs)
+  - **`controller/`**: HTTP controllers (ready to be annotated with Spring `@RestController` later)
+  - **`request/`**: Request DTOs for API contracts
+  - **`response/`**: Response DTOs for API contracts
+- **`persistence/`**: (Planned) Database-related implementations
+  - **`entity/`**: (Planned) JPA entities (database representation, separate from domain entities)
+  - **`repository/`**: (Planned) Concrete repository implementations (implements output ports from `application/port/output/`)
+  - **`mapper/`**: (Planned) Converts between JPA entities and domain entities
+- **`messaging/`**: (Planned) Kafka-related implementations
+  - **`producer/`**: (Planned) Event producers that publish to Kafka
+  - **`consumer/`**: (Planned) Event consumers that process Kafka messages
+  - **`config/`**: (Planned) Kafka configuration classes
+- **`config/`**: (Planned) Infrastructure configuration (database config, connection pools, etc.)
 
-**Key Principles:**
-- Implements interfaces defined in `application/port/output/`
-- Can depend on frameworks (Spring, JPA, Kafka)
-- Handles all technical concerns
-- Isolated from business logic
+**Key Principles (current state):**
+- Only the `http/` layer is implemented
+- HTTP controllers are thin and delegate to use cases
+- HTTP DTOs live in `request/` and `response/`
+- Business logic stays in `domain/` and `application/`
 
-**Example contents:**
+**Key Principles (planned):**
+- Persistence and messaging implementations will live under `persistence/` and `messaging/`
+- Infrastructure will implement ports defined in `application/port/output/`
+- Infrastructure can depend on frameworks (Spring, JPA, Kafka)
+
+**Example contents (implemented):**
+- `TransactionController` (HTTP entrypoint)
+- `CreateTransactionRequest`, `TransactionResponse` (HTTP DTOs)
+
+**Example contents (planned):**
 - `JpaTransactionRepository` (implements `TransactionRepository` port)
 - `KafkaTransactionProducer` (implements `EventPublisher` port)
 - `TransactionEntity` (JPA entity)
 - `TransactionEntityMapper`
-
----
-
-### 4. `adapter/` - Interface Adapters
-
-**Purpose:** Adapts external interfaces (like REST APIs) to the application layer. Translates between external formats and application models.
-
-**Why this name:**
-- **`adapter/`**: Implements the Adapter pattern - adapts external interfaces to application needs
-- **`api/`**: REST API adapters
-  - **`controller/`**: REST controllers (Spring `@RestController`)
-  - **`dto/`**: Request/Response DTOs for API contracts
-  - **`mapper/`**: Converts between API DTOs and domain/application models
-- **`messaging/`**: Message adapters (if you want to separate message handling from infrastructure)
-
-**Key Principles:**
-- Translates external formats (JSON, HTTP) to domain/application models
-- Implements input ports from `application/port/input/`
-- Handles HTTP concerns (validation, serialization)
-- Thin layer - delegates to use cases
-
-**Example contents:**
-- `TransactionController` (REST endpoints)
-- `TransactionRequestDto`, `TransactionResponseDto`
-- `TransactionDtoMapper`
 
 ---
 
@@ -149,17 +138,15 @@ src/main/java/io/rafaalberto/transaction_stream_processor/
 The dependency rule in Clean Architecture states that **dependencies should point inward**:
 
 ```
-adapter → application → domain
 infrastructure → application → domain
 ```
 
 **Rules:**
-- ✅ `adapter/` can depend on `application/` and `domain/`
 - ✅ `infrastructure/` can depend on `application/` and `domain/`
 - ✅ `application/` can depend on `domain/`
 - ❌ `domain/` **cannot** depend on anything else
-- ❌ `application/` **cannot** depend on `adapter/` or `infrastructure/`
-- ❌ `adapter/` and `infrastructure/` **cannot** depend on each other
+- ❌ `application/` **cannot** depend on `infrastructure/`
+- ❌ Different parts of `infrastructure/` (e.g., `http/`, `persistence/`, `messaging/`) **should not** depend on each other
 
 This ensures that:
 - Business logic remains independent and testable
@@ -170,29 +157,49 @@ This ensures that:
 
 ## 🔄 Data Flow Example
 
-### Ingesting a Transaction:
+### Ingesting a Transaction (current implementation):
 
-1. **`adapter/api/controller/TransactionController`**
-   - Receives HTTP POST request
-   - Maps `TransactionRequestDto` to domain model
-   - Calls use case from `application/usecase/`
+1. **`infrastructure/http/controller/TransactionController`**
+   - Receives an HTTP-like request (no framework wiring yet)
+   - Maps `CreateTransactionRequest` to `CreateTransactionCommand`
+   - Calls use case from `application/usecases/`
 
-2. **`application/usecase/IngestTransactionUseCase`**
-   - Orchestrates the ingestion workflow
-   - Uses domain services for validation
+2. **`application/usecases/CreateTransactionUseCase`**
+   - Orchestrates the transaction creation workflow
+   - Creates domain entity (which validates business rules)
+   - Returns the `Transaction` to the controller
+
+3. **`domain/entity/Transaction`**
+   - Validates transaction business rules during construction
+   - Throws domain exceptions if invalid
+
+4. **`infrastructure/http/controller/TransactionController`**
+   - Maps the `Transaction` to `TransactionResponse`
+   - Returns the response DTO
+
+### Ingesting a Transaction (planned full flow):
+
+1. **`infrastructure/http/controller/TransactionController`**
+   - Receives HTTP POST request (via Spring MVC)
+   - Maps `CreateTransactionRequest` to `CreateTransactionCommand`
+   - Calls use case from `application/usecases/`
+
+2. **`application/usecases/CreateTransactionUseCase`**
+   - Orchestrates the transaction creation workflow
+   - Uses domain entities and services to enforce business rules
    - Calls output ports (repository, event publisher)
 
-3. **`domain/service/TransactionValidator`**
-   - Validates transaction business rules
+3. **`domain/entity/Transaction`**
+   - Validates transaction business rules during construction
    - Throws domain exceptions if invalid
 
 4. **`infrastructure/persistence/repository/JpaTransactionRepository`**
-   - Implements `TransactionRepository` port
-   - Persists transaction to database
+   - (Planned) Implements `TransactionRepository` port (from `application/port/output/`)
+   - (Planned) Persists transaction to database
 
 5. **`infrastructure/messaging/producer/KafkaTransactionProducer`**
-   - Implements `EventPublisher` port
-   - Publishes event to Kafka topic
+   - (Planned) Implements `EventPublisher` port (from `application/port/output/`)
+   - (Planned) Publishes event to Kafka topic
 
 ---
 
@@ -202,10 +209,10 @@ If you prefer different terminology, here are some alternatives:
 
 - **`usecase/`** → `service/` (if you prefer "service" for use cases)
 - **`port/`** → `interface/` or `contract/`
-- **`infrastructure/`** → `adapter/` (if you want to merge infrastructure and adapters)
-- **`adapter/`** → `presentation/` or `interface/`
+- **`infrastructure/http/`** → `adapter/api/` or `presentation/api/` (if you prefer separating adapters from infrastructure)
+- **`infrastructure/http/request/`** → `infrastructure/http/dto/` (if you prefer "dto" over "request/response")
 
-The important thing is consistency and clarity within your team.
+The important thing is consistency and clarity within your team. This project uses `infrastructure/http/` to keep all framework-specific code in the infrastructure layer.
 
 ---
 
