@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ApiExceptionHandler {
 
   @ExceptionHandler(InvalidTransactionException.class)
-  public ResponseEntity<String> handleInvalidTransaction(InvalidTransactionException ex) {
+  public ResponseEntity<String> handleInvalidTransaction(final InvalidTransactionException ex) {
     return ResponseEntity.badRequest().body(ex.getMessage());
   }
 }
