@@ -40,4 +40,16 @@ class TransactionIntegrationTest {
         .andExpect(jsonPath("$.amount").value(amount))
         .andExpect(jsonPath("$.occurredAt").value(OCCURRED_AT.toString()));
   }
+
+  @Test
+  void shouldReturnBadRequestWhenAmountIsZero() throws Exception {
+    var request = new CreateTransactionRequest(BigDecimal.valueOf(0), OCCURRED_AT);
+
+    mockMvc
+        .perform(
+            post("/transactions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
 }
