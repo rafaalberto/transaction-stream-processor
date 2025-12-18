@@ -1,6 +1,6 @@
 package io.rafaalberto.transactionstreamprocessor.infrastructure.http.exception;
 
-import io.rafaalberto.transactionstreamprocessor.domain.exception.InvalidTransactionException;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.InvalidTransactionException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
