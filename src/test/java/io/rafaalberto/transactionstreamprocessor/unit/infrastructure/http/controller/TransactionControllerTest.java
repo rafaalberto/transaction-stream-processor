@@ -8,8 +8,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
-import io.rafaalberto.transactionstreamprocessor.domain.entity.Transaction;
-import io.rafaalberto.transactionstreamprocessor.domain.entity.TransactionID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.TransactionController;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.response.TransactionResponse;
@@ -27,9 +29,14 @@ class TransactionControllerTest {
     var transactionController = new TransactionController(createTransactionUseCase);
 
     var amount = BigDecimal.valueOf(100);
-    var createTransactionRequest = new CreateTransactionRequest(amount, OCCURRED_AT);
+    var currency = Currency.BRL;
+    var type = TransactionType.CREDIT;
+    var externalReference = "account-service::account-123";
+    var createTransactionRequest =
+        new CreateTransactionRequest(amount, currency, type, OCCURRED_AT, externalReference);
 
-    var transaction = new Transaction(TransactionID.random(), amount, OCCURRED_AT);
+    var transaction =
+        Transaction.create(new Money(amount, currency), type, OCCURRED_AT, externalReference);
 
     when(createTransactionUseCase.execute(any())).thenReturn(transaction);
 
@@ -37,9 +44,11 @@ class TransactionControllerTest {
         transactionController.create(createTransactionRequest);
 
     assertThat(transactionResponse).isNotNull();
-    assertThat(transactionResponse.id()).isEqualTo(transaction.id().value());
-    assertThat(transactionResponse.amount()).isEqualTo(amount);
+    assertThat(transactionResponse.id()).isNotNull();
+    assertThat(transactionResponse.money().amount()).isEqualTo(amount);
+    assertThat(transactionResponse.money().currency()).isEqualTo(currency.toString());
     assertThat(transactionResponse.occurredAt()).isEqualTo(OCCURRED_AT);
+    assertThat(transactionResponse.createdAt()).isAfterOrEqualTo(transaction.occurredAt());
 
     verify(createTransactionUseCase).execute(any());
     verifyNoMoreInteractions(createTransactionUseCase);

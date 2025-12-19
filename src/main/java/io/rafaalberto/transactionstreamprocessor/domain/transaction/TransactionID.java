@@ -1,4 +1,4 @@
-package io.rafaalberto.transactionstreamprocessor.domain.entity;
+package io.rafaalberto.transactionstreamprocessor.domain.transaction;
 
 import java.util.Objects;
 import java.util.UUID;

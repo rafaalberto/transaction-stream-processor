@@ -1,4 +1,4 @@
-package io.rafaalberto.transactionstreamprocessor.domain.exception;
+package io.rafaalberto.transactionstreamprocessor.domain.transaction.exception;
 
 public class InvalidTransactionException extends RuntimeException {
 

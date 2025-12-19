@@ -1,13 +1,15 @@
 package io.rafaalberto.transactionstreamprocessor.application.usecases;
 
-import io.rafaalberto.transactionstreamprocessor.domain.entity.Transaction;
-import io.rafaalberto.transactionstreamprocessor.domain.entity.TransactionID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
 
-public class CreateTransactionUseCase {
+public final class CreateTransactionUseCase {
 
   public Transaction execute(final CreateTransactionCommand command) {
-    var transaction =
-        new Transaction(TransactionID.random(), command.amount(), command.occurredAt());
-    return transaction;
+    return Transaction.create(
+        new Money(command.amount(), command.currency()),
+        command.type(),
+        command.occurredAt(),
+        command.externalReference());
   }
 }

@@ -14,7 +14,13 @@ public class TransactionController {
   }
 
   public TransactionResponse create(final CreateTransactionRequest request) {
-    var command = new CreateTransactionCommand(request.amount(), request.occurredAt());
+    var command =
+        new CreateTransactionCommand(
+            request.amount(),
+            request.currency(),
+            request.type(),
+            request.occurredAt(),
+            request.externalReference());
 
     var transactionUseCase = createTransactionUseCase.execute(command);
 

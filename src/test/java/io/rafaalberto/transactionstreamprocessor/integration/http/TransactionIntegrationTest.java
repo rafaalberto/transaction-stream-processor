@@ -4,6 +4,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,7 +30,12 @@ class TransactionIntegrationTest {
   @Test
   void shouldCreateTransactionEndToEnd() throws Exception {
     var amount = BigDecimal.valueOf(100);
-    var request = new CreateTransactionRequest(amount, OCCURRED_AT);
+    var currency = Currency.BRL;
+    var type = TransactionType.CREDIT;
+    var externalReference = "account-service::account-123";
+
+    var request =
+        new CreateTransactionRequest(amount, currency, type, OCCURRED_AT, externalReference);
 
     mockMvc
         .perform(
@@ -37,13 +44,20 @@ class TransactionIntegrationTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").exists())
-        .andExpect(jsonPath("$.amount").value(amount))
+        .andExpect(jsonPath("$.money.amount").value(amount))
+        .andExpect(jsonPath("$.money.currency").value(currency.name()))
         .andExpect(jsonPath("$.occurredAt").value(OCCURRED_AT.toString()));
   }
 
   @Test
   void shouldReturnBadRequestWhenAmountIsZero() throws Exception {
-    var request = new CreateTransactionRequest(BigDecimal.valueOf(0), OCCURRED_AT);
+    var amount = BigDecimal.valueOf(0);
+    var currency = Currency.BRL;
+    var type = TransactionType.CREDIT;
+    var externalReference = "account-service::account-123";
+
+    var request =
+        new CreateTransactionRequest(amount, currency, type, OCCURRED_AT, externalReference);
 
     mockMvc
         .perform(
