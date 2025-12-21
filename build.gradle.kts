@@ -22,6 +22,8 @@ repositories {
 	mavenCentral()
 }
 
+val testcontainersVersion = "1.19.8"
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -33,6 +35,8 @@ dependencies {
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("com.h2database:h2")
+    testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
+    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
