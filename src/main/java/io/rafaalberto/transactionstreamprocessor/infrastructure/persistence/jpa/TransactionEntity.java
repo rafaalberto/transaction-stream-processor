@@ -37,6 +37,8 @@ public class TransactionEntity {
   @Column(name = "external_reference", length = 100, nullable = false)
   private String externalReference;
 
+  protected TransactionEntity() {}
+
   public TransactionEntity(
       final UUID id,
       final BigDecimal amount,
