@@ -1,4 +1,4 @@
-package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence;
+package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.inmemory;
 
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
