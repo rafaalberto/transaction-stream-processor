@@ -3,7 +3,7 @@ package io.rafaalberto.transactionstreamprocessor.infrastructure.config;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.TransactionController;
-import io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.InMemoryTransactionRepository;
+import io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.inmemory.InMemoryTransactionRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

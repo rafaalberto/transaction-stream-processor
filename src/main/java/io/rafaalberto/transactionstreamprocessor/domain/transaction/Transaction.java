@@ -49,6 +49,18 @@ public final class Transaction {
         externalReference);
   }
 
+  public static Transaction restore(
+      final TransactionID transactionID,
+      final Money money,
+      final TransactionStatus status,
+      final TransactionType type,
+      final Instant occurredAt,
+      final Instant createdAt,
+      final String externalReference) {
+    return new Transaction(
+        transactionID, money, type, occurredAt, createdAt, status, externalReference);
+  }
+
   public TransactionID id() {
     return id;
   }
