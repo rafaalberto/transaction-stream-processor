@@ -12,21 +12,20 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
-import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.TransactionController;
+import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.CreateTransactionController;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
-import io.rafaalberto.transactionstreamprocessor.infrastructure.http.response.TransactionResponse;
 import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
-class TransactionControllerTest {
+class CreateTransactionControllerTest {
 
   private static final Instant OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
 
   @Test
   void shouldCallUseCaseAndReturnTransactionResponse() {
-    var createTransactionUseCase = mock(CreateTransactionUseCase.class);
-    var transactionController = new TransactionController(createTransactionUseCase);
+    var useCase = mock(CreateTransactionUseCase.class);
+    var controller = new CreateTransactionController(useCase);
 
     var amount = BigDecimal.valueOf(100);
     var currency = Currency.BRL;
@@ -38,19 +37,18 @@ class TransactionControllerTest {
     var transaction =
         Transaction.create(new Money(amount, currency), type, OCCURRED_AT, externalReference);
 
-    when(createTransactionUseCase.execute(any())).thenReturn(transaction);
+    when(useCase.execute(any())).thenReturn(transaction);
 
-    TransactionResponse transactionResponse =
-        transactionController.create(createTransactionRequest);
+    var response = controller.create(createTransactionRequest);
 
-    assertThat(transactionResponse).isNotNull();
-    assertThat(transactionResponse.id()).isNotNull();
-    assertThat(transactionResponse.money().amount()).isEqualTo(amount);
-    assertThat(transactionResponse.money().currency()).isEqualTo(currency.toString());
-    assertThat(transactionResponse.occurredAt()).isEqualTo(OCCURRED_AT);
-    assertThat(transactionResponse.createdAt()).isAfterOrEqualTo(transaction.occurredAt());
+    assertThat(response).isNotNull();
+    assertThat(response.id()).isNotNull();
+    assertThat(response.money().amount()).isEqualTo(amount);
+    assertThat(response.money().currency()).isEqualTo(currency.toString());
+    assertThat(response.occurredAt()).isEqualTo(OCCURRED_AT);
+    assertThat(response.createdAt()).isAfterOrEqualTo(transaction.occurredAt());
 
-    verify(createTransactionUseCase).execute(any());
-    verifyNoMoreInteractions(createTransactionUseCase);
+    verify(useCase).execute(any());
+    verifyNoMoreInteractions(useCase);
   }
 }

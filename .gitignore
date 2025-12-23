@@ -6,6 +6,11 @@
 *.iml
 *.ipr
 
+# ---------------------------------------
+# VSCode
+# ---------------------------------------
+.vscode/
+
 # SonarLint / plugin configs
 .idea/sonarlint/
 

@@ -4,17 +4,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
-import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.TransactionController;
+import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.CreateTransactionController;
+import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.GetTransactionByIdController;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.resource.TransactionResource;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.response.MoneyResponse;
+import io.rafaalberto.transactionstreamprocessor.infrastructure.http.response.TransactionDetailsResponse;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.response.TransactionResponse;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -34,7 +38,8 @@ class TransactionResourceTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockitoBean private TransactionController transactionController;
+  @MockitoBean private CreateTransactionController createTransactionController;
+  @MockitoBean private GetTransactionByIdController getTransactionByIdController;
 
   @Autowired private ObjectMapper objectMapper;
 
@@ -56,7 +61,7 @@ class TransactionResourceTest {
             OCCURRED_AT,
             CREATED_AT);
 
-    when(transactionController.create(any())).thenReturn(response);
+    when(createTransactionController.create(any())).thenReturn(response);
     mockMvc
         .perform(
             post("/transactions")
@@ -69,7 +74,40 @@ class TransactionResourceTest {
         .andExpect(jsonPath("$.occurredAt").value(OCCURRED_AT.toString()))
         .andExpect(jsonPath("$.createdAt").value(CREATED_AT.toString()));
 
-    verify(transactionController).create(any());
-    verifyNoMoreInteractions(transactionController);
+    verify(createTransactionController).create(any());
+    verifyNoMoreInteractions(createTransactionController);
+  }
+
+  @Test
+  void shouldGetTransactionByIdSuccessfully() throws Exception {
+    var transactionId = TransactionID.random();
+    var amount = BigDecimal.valueOf(100);
+    var currency = Currency.BRL;
+    var status = TransactionStatus.CREATED.name();
+
+    var response =
+        new TransactionDetailsResponse(
+            transactionId.value(),
+            new MoneyResponse(amount, currency.name()),
+            status,
+            OCCURRED_AT,
+            CREATED_AT);
+
+    when(getTransactionByIdController.findById(any(TransactionID.class))).thenReturn(response);
+
+    mockMvc
+        .perform(
+            get("/transactions/{id}", transactionId.value().toString())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(response.id().toString()))
+        .andExpect(jsonPath("$.money.amount").value(amount))
+        .andExpect(jsonPath("$.money.currency").value(currency.name()))
+        .andExpect(jsonPath("$.status").value(status))
+        .andExpect(jsonPath("$.occurredAt").value(OCCURRED_AT.toString()))
+        .andExpect(jsonPath("$.createdAt").value(CREATED_AT.toString()));
+
+    verify(getTransactionByIdController).findById(any(TransactionID.class));
+    verifyNoMoreInteractions(getTransactionByIdController);
   }
 }

@@ -5,11 +5,11 @@ import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTran
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.response.TransactionResponse;
 
-public class TransactionController {
+public class CreateTransactionController {
 
   private final CreateTransactionUseCase createTransactionUseCase;
 
-  public TransactionController(final CreateTransactionUseCase createTransactionUseCase) {
+  public CreateTransactionController(final CreateTransactionUseCase createTransactionUseCase) {
     this.createTransactionUseCase = createTransactionUseCase;
   }
 
@@ -22,8 +22,8 @@ public class TransactionController {
             request.occurredAt(),
             request.externalReference());
 
-    var transactionUseCase = createTransactionUseCase.execute(command);
+    var useCase = createTransactionUseCase.execute(command);
 
-    return TransactionResponse.from(transactionUseCase);
+    return TransactionResponse.from(useCase);
   }
 }
