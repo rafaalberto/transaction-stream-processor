@@ -8,7 +8,6 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.InvalidTransactionException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -79,17 +78,5 @@ class TransactionTest {
             NullPointerException.class,
             () -> Transaction.create(money, TransactionType.CREDIT, OCCURRED_AT, null));
     assertThat(exception.getMessage()).isEqualTo("ExternalReference cannot be null");
-  }
-
-  @Test
-  void shouldNotAllowBlankExternalReference() {
-    var money = new Money(BigDecimal.valueOf(100), Currency.BRL);
-
-    var exception =
-        assertThrows(
-            InvalidTransactionException.class,
-            () -> Transaction.create(money, TransactionType.CREDIT, OCCURRED_AT, "  "));
-
-    assertThat(exception.getMessage()).isEqualTo("ExternalReference cannot be blank");
   }
 }

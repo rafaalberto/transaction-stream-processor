@@ -13,6 +13,7 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.TransactionNotFoundException;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.CreateTransactionController;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.GetTransactionByIdController;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
@@ -79,6 +80,104 @@ class TransactionResourceTest {
   }
 
   @Test
+  void shouldReturnBadRequestWhenAmountIsZero() throws Exception {
+    var request =
+        new CreateTransactionRequest(
+            BigDecimal.ZERO,
+            Currency.BRL,
+            TransactionType.CREDIT,
+            Instant.parse("2025-03-23T11:00:00Z"),
+            "account-service::account-123");
+
+    mockMvc
+        .perform(
+            post("/transactions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Validation error"))
+        .andExpect(jsonPath("$.details[0]").value("amount: amount must be greater than zero"));
+  }
+
+  @Test
+  void shouldReturnBadRequestWhenCurrencyIsInvalid() throws Exception {
+    String invalidJson =
+        """
+      {
+        "amount": 1,
+        "currency": "CAD",
+        "type": "CREDIT",
+        "occurredAt": "2025-03-23T11:00:00Z",
+        "externalReference": "account-service::account-123"
+      }
+      """;
+
+    mockMvc
+        .perform(post("/transactions").contentType(MediaType.APPLICATION_JSON).content(invalidJson))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Invalid value for field 'currency'"))
+        .andExpect(
+            jsonPath("$.details[0]")
+                .value("currency 'CAD' is not supported. Supported values are: BRL, USD, EUR"));
+  }
+
+  @Test
+  void shouldReturnBadRequestWhenTypeIsInvalid() throws Exception {
+    String invalidJson =
+        """
+      {
+        "amount": 1,
+        "currency": "USD",
+        "type": "REFUND",
+        "occurredAt": "2025-03-23T11:00:00Z",
+        "externalReference": "account-service::account-123"
+      }
+      """;
+
+    mockMvc
+        .perform(post("/transactions").contentType(MediaType.APPLICATION_JSON).content(invalidJson))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Invalid value for field 'type'"))
+        .andExpect(
+            jsonPath("$.details[0]")
+                .value("type 'REFUND' is not supported. Supported values are: CREDIT, DEBIT"));
+  }
+
+  @Test
+  void shouldReturnBadRequestWhenExternalReferenceIsBlank() throws Exception {
+    var request =
+        new CreateTransactionRequest(
+            BigDecimal.ONE,
+            Currency.BRL,
+            TransactionType.CREDIT,
+            Instant.parse("2025-03-23T11:00:00Z"),
+            "");
+
+    mockMvc
+        .perform(
+            post("/transactions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Validation error"))
+        .andExpect(
+            jsonPath("$.details[0]").value("externalReference: externalReference is required"));
+  }
+
+  @Test
+  void shouldReturnBadRequestWhenJsonIsInvalid() throws Exception {
+    String invalidJson = """
+      {"invalid json"}
+      """;
+
+    mockMvc
+        .perform(post("/transactions").contentType(MediaType.APPLICATION_JSON).content(invalidJson))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Malformed JSON request"))
+        .andExpect(jsonPath("$.details[0]").value("Request body is invalid or unreadable"));
+  }
+
+  @Test
   void shouldGetTransactionByIdSuccessfully() throws Exception {
     var transactionId = TransactionID.random();
     var amount = BigDecimal.valueOf(100);
@@ -106,6 +205,27 @@ class TransactionResourceTest {
         .andExpect(jsonPath("$.status").value(status))
         .andExpect(jsonPath("$.occurredAt").value(OCCURRED_AT.toString()))
         .andExpect(jsonPath("$.createdAt").value(CREATED_AT.toString()));
+
+    verify(getTransactionByIdController).findById(any(TransactionID.class));
+    verifyNoMoreInteractions(getTransactionByIdController);
+  }
+
+  @Test
+  void shouldReturnNotFoundWhenTransactionNotExist() throws Exception {
+    var transactionId = TransactionID.random();
+
+    when(getTransactionByIdController.findById(any(TransactionID.class)))
+        .thenThrow(new TransactionNotFoundException(transactionId));
+
+    mockMvc
+        .perform(
+            get("/transactions/{id}", transactionId.value().toString())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.message").value("Transaction not found"))
+        .andExpect(
+            jsonPath("$.details[0]")
+                .value("Transaction not found for ID: " + transactionId.value()));
 
     verify(getTransactionByIdController).findById(any(TransactionID.class));
     verifyNoMoreInteractions(getTransactionByIdController);
