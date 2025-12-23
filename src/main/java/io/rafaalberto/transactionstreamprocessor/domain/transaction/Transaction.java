@@ -91,18 +91,11 @@ public final class Transaction {
 
   private void validate() {
     validateOccurredAt();
-    validateExternalReference();
   }
 
   private void validateOccurredAt() {
     if (occurredAt.isAfter(createdAt)) {
       throw new InvalidTransactionException("OccurredAt cannot be after CreatedAt");
-    }
-  }
-
-  private void validateExternalReference() {
-    if (externalReference.isBlank()) {
-      throw new InvalidTransactionException("ExternalReference cannot be blank");
     }
   }
 

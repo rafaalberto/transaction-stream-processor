@@ -6,6 +6,7 @@ import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.Cre
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.GetTransactionByIdRequest;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.response.TransactionDetailsResponse;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.response.TransactionResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +32,7 @@ public class TransactionResource {
 
   @PostMapping
   public ResponseEntity<TransactionResponse> create(
-      @RequestBody final CreateTransactionRequest createTransactionRequest) {
+      @Valid @RequestBody final CreateTransactionRequest createTransactionRequest) {
     var response = createTransactionController.create(createTransactionRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }

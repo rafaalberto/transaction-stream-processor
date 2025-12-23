@@ -5,6 +5,6 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionI
 public class TransactionNotFoundException extends RuntimeException {
 
   public TransactionNotFoundException(final TransactionID transactionID) {
-    super("Transaction not found: " + transactionID);
+    super("Transaction not found for ID: " + transactionID.value());
   }
 }
