@@ -10,233 +10,275 @@
 
 ## 📌 Overview
 
-**Transaction Stream Processor** is an event-driven microservice designed to ingest, validate, and process financial transactions in real time.  
-It demonstrates modern distributed-systems concepts used in fintech environments, including:
+**Transaction Stream Processor** is an event-driven backend service designed to ingest, validate, persist, and process financial transactions.
 
-- **Clean Architecture** & Domain-Driven Design (DDD) principles
-- Framework-agnostic domain and application layers
-- Event-driven architecture (planned)
-- Apache Kafka producers and consumers (planned)
-- Transaction persistence (planned)
-- Dead-letter queue (DLQ) handling (planned)
-- Outbox-style *"persist + publish"* atomic workflow (planned)
+This project is intentionally built as a **portfolio-grade system**, focusing on **architecture, correctness, and scalability**, rather than CRUD scaffolding.
 
-This repository is part of my public portfolio and reflects practical experience gained from real-world financial systems.
+It demonstrates real-world backend engineering practices commonly used in fintech and distributed systems, including clean boundaries, strong validation, explicit use cases, and production-style testing.
 
-> 🛠 **Note:** This project is a **work in progress**. Currently implementing the core architecture with no-framework code. Spring Boot, Kafka, and persistence layers will be added next.
+> ⚠️ This project is a **work in progress by design**. Kafka-based event streaming and asynchronous processing are planned next.
 
 ---
 
-## 🎯 Purpose of the Service
+## 🎯 Service Responsibility
 
-This service focuses specifically on **transaction ingestion and processing**, not balance calculations.  
-Its core responsibilities include:
+This service is responsible for **transaction ingestion and lifecycle tracking**, not balance calculation.
 
-### ✅ **Currently Implemented**
+### What it does today
+- Accepts transaction creation requests via HTTP
+- Validates input at API and domain boundaries
+- Persists transactions in PostgreSQL
+- Allows querying transactions by ID
+- Exposes consistent and user-friendly error responses
 
-**1. Domain Layer (Core Business Logic)**
-- `Transaction` entity with business rules validation
-- `TransactionID` value object
-- Domain exceptions (`InvalidTransactionException`)
-- Framework-agnostic, pure Java business logic
-
-**2. Application Layer (Use Cases)**
-- `CreateTransactionUseCase` - orchestrates transaction creation
-- Command objects (`CreateTransactionCommand`)
-- Clean separation from infrastructure concerns
-
-**3. Infrastructure Layer (HTTP Adapters)**
-- `TransactionController` - HTTP controller structure (ready for Spring integration)
-- Request/Response DTOs (`CreateTransactionRequest`, `TransactionResponse`)
-- No framework dependencies in business logic
-
-### 🔄 **Planned Features**
-
-**1. Ingesting external transaction requests**
-A REST API (with Spring Boot) will receive incoming transactions and publish them to the Kafka topic `TRANSACTIONS.EVENTS`.
-
-**2. Processing events asynchronously**
-A processing module will consume Kafka events, execute validation rules, and determine the transaction's outcome.
-
-**3. Persisting and publishing results atomically**
-A dedicated handler will perform:
-- Transaction persistence (via repository pattern)
-- Publication of a new event `TRANSACTIONS.PROCESSED`
-
-This ensures downstream services can react (Fraud, Notification, Audit, etc.).
-
-**4. Handling invalid data safely**
-Invalid transactions will be routed to **`TRANSACTIONS.EVENTS.DLQ`** for later investigation.
+### What it will do next
+- Publish transaction events to Kafka
+- Process transactions asynchronously
+- Handle failures using DLQ patterns
+- Guarantee atomic persist + publish using the Outbox pattern
 
 ---
 
-## 🧩 High-Level Architecture
+## 🧠 Architectural Rationale
 
-Place your exported diagram in the folder `docs/diagram.png` and reference it like this:
+This project was designed to demonstrate how a backend system can evolve incrementally while preserving architectural integrity.
 
-![Architecture Diagram](docs/diagram.jpg)
+The core follows Clean Architecture principles, with a strict separation between domain, application, and infrastructure layers. The domain and use cases are completely framework-agnostic, allowing infrastructure concerns (HTTP, persistence, messaging) to change without impacting business rules.
 
----
+Instead of introducing Kafka and persistence upfront, the system was intentionally built in stages:
+- First, by modeling the domain and its invariants.
+- Then, by introducing persistence with PostgreSQL and Flyway.
+- And only afterwards, preparing the system for event-driven processing with Kafka.
 
-## 🏗 Project Structure
+This approach mirrors real-world systems, where architecture must support continuous change rather than assume perfect requirements from day one.
 
-The project follows **Clean Architecture** principles with clear layer separation:
+The goal is not to showcase as many technologies as possible, but to demonstrate conscious architectural decisions, low coupling, and a sustainable path for future evolution.
 
-### **✅ Implemented Layers**
+## ⚖️ Design Trade-offs
 
-**1. Domain Layer** (`domain/`)
-- Core business entities and value objects
-- Business rules and validation
-- Domain exceptions
-- Zero framework dependencies
+Some design decisions were made deliberately to balance simplicity, clarity, and future extensibility:
 
-**2. Application Layer** (`application/`)
-- Use case implementations
-- Command objects
-- Port interfaces (to be implemented)
-- Orchestrates domain logic
+- **No premature abstractions**  
+  The code avoids generic mappers, base repositories, or overly flexible interfaces until there is a real need. This keeps the codebase easy to read and reason about.
 
-**3. Infrastructure Layer** (`infrastructure/`)
-- HTTP adapters (controllers, DTOs)
-- Ready for Spring Boot integration
-- Will include persistence and messaging adapters
+- **Use cases as concrete classes**  
+  Application use cases are implemented as concrete classes instead of interfaces, reducing indirection and improving readability. Abstractions are introduced only when multiple implementations become necessary.
 
-### **🔄 Planned Modules**
+- **Incremental persistence strategy**  
+  The project started with in-memory implementations and evolved to PostgreSQL using JPA and Flyway. This allowed the domain and application layers to stabilize before introducing infrastructure complexity.
 
-**1. Transaction Ingress Module**
-- Spring Boot REST API integration
-- Kafka event publishing
-- Ensures decoupling between API and processing logic
+- **Test strategy aligned with evolution stage**  
+  The project combines pure unit tests for domain and application logic with slice tests for HTTP controllers. Full integration tests are introduced once infrastructure components become relevant.
 
-**2. Transaction Processing Module**
-- Kafka event consumers
-- Validation rules execution
-- Use case orchestration
-- Transaction persistence
-- Processed event publishing
-- DLQ handling for invalid transactions
-
-**3. Downstream Consumers (External)**
-These are not part of the service but illustrate event propagation:
-
-- **Notification Service**
-- **Fraud Detection**
-- **Audit Trail Processor**
-
-For detailed architecture documentation, see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
+These trade-offs favor long-term maintainability and clear intent over architectural perfection or pattern-heavy designs.
 
 ---
 
-## 🛠 Tech Stack
+## 🧱 Architecture Overview
 
-### ✅ **Currently Used**
-- **Java 21** - Modern Java features
-- **Gradle** - Build tool
-- **JUnit 5** - Unit testing
-- **AssertJ** - Fluent assertions
-- **Mockito** - Mocking framework
-- **Spotless** - Code formatting
-- **Checkstyle** - Static code analysis
-
-### 🔄 **Planned**
-- **Spring Boot** - Framework integration (dependencies added, integration pending)
-- **Apache Kafka** - Event streaming
-- **JPA / Database** - Transaction persistence
-- **Docker / Docker Compose** - Containerization
-- **Testcontainers** - Integration testing
-
----
-
-# 🧪 Running Tests
+The project follows **Clean Architecture**, enforcing strict dependency rules:
 
 ```
+domain → application → infrastructure
+```
+
+- **Domain**: pure business logic, no framework dependencies  
+- **Application**: use cases and orchestration  
+- **Infrastructure**: HTTP, persistence, messaging, configuration  
+
+An architecture diagram is available at:
+
+```
+docs/diagram.jpg
+```
+
+---
+## 🧪 Testing Strategy
+
+The project uses multiple testing layers to ensure correctness and confidence:
+
+- **Domain tests** — pure business rules
+- **Use case tests** — orchestration and behavior
+- **Resource tests (`@WebMvcTest`)** — HTTP contract, validation, error handling
+- **Integration tests** — real PostgreSQL using Testcontainers
+
+Run tests locally:
+
+```bash
 ./gradlew test
 ./gradlew integrationTest
 ```
 
 ---
 
-# 🔍 Code Quality — Quick Reference
+## 🏗 Project Structure
 
-This project includes a lightweight, production-style quality pipeline designed to keep the codebase clean, safe, and maintainable.
-
-## 🚀 Why This Matters
-Linting enforces:
-
-- Consistent formatting
-- Safe coding patterns
-- Reduced complexity
-- High maintainability
-
-These practices reflect standards used in fintech and high-availability backend systems.
-
-## ⚙️ Tools
-- **Spotless** — formatting (Google Java Style)
-- **Checkstyle** — static analysis & best practices
-- **EditorConfig** — editor-agnostic consistency
-
-## 🧭 Most Important Commands
-
-**Format code (auto-fix)**
 ```
+src/main/java
+├─ domain
+│ └─ transaction
+│   ├─ Transaction
+│   ├─ TransactionID
+│   ├─ Money
+│   ├─ Currency
+│   ├─ TransactionStatus
+│   └─ exception
+│
+├─ application
+│ ├─ usecases
+│ │ ├─ CreateTransactionUseCase
+│ │ └─ GetTransactionByIdUseCase
+│ └─ repository
+│   └─ TransactionRepository
+│
+└─ infrastructure
+  ├─ http
+  │ ├─ resource
+  │ ├─ controller
+  │ ├─ request
+  │ ├─ response
+  │ └─ advice
+  └─ persistence
+    ├─ jpa
+    └─ flyway
+```
+
+---
+
+## 🛠 Tech Stack
+
+### Currently Used
+- **Java 21**
+- **Spring Boot 4**
+- **Gradle**
+- **PostgreSQL**
+- **Spring Data JPA**
+- **Flyway**
+- **Docker & Docker Compose**
+- **JUnit 5**
+- **Mockito**
+- **AssertJ**
+- **Testcontainers**
+- **Spotless**
+- **Checkstyle**
+
+### Planned
+- **Apache Kafka**
+- **Dead Letter Queue (DLQ)**
+- **Outbox Pattern**
+
+---
+
+## 🐳 Running with Docker Compose
+
+The application can be fully started locally using Docker Compose.
+
+### Prerequisites
+- Docker
+- Docker Compose
+- Available ports:
+  - `8081` for the application
+  - `5433` for PostgreSQL
+
+### Start services
+
+```bash
+docker compose up --build
+```
+
+This will:
+- Start PostgreSQL on port `5433`
+- Build and start the application on port `8081`
+- Execute Flyway migrations automatically
+
+### Stop services
+
+```bash
+docker compose down
+```
+
+Remove volumes (reset database):
+
+```bash
+docker compose down -v
+```
+
+---
+
+## 🔌 API Examples
+
+### Create a transaction
+
+```bash
+curl -X POST http://localhost:8081/transactions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 100,
+    "currency": "BRL",
+    "type": "CREDIT",
+    "occurredAt": "2025-03-23T11:00:00Z",
+    "externalReference": "account-service::123"
+  }'
+```
+
+### Get transaction by ID
+Use the `id` returned by the create transaction endpoint.
+```bash
+curl -X GET http://localhost:8081/transactions/{transactionId}
+```
+
+---
+
+## 🔍 Code Quality
+
+Code quality is treated as a first-class concern.
+
+### Tools
+- **Spotless** — code formatting
+- **Checkstyle** — static analysis
+- **EditorConfig** — editor consistency
+
+### Useful commands
+
+```bash
 ./gradlew spotlessApply
-```
-
-**Verify formatting**
-```
-./gradlew spotlessCheck
-```
-
-**Run static analysis**
-```
-./gradlew checkstyleMain checkstyleTest
-```
-
-**Full quality gate (CI equivalent)**
-```
 ./gradlew check
 ```
 
-## 📊 Reports
-- Checkstyle: `build/reports/checkstyle/checkstyle.html`
-- Tests: `build/reports/tests/`
+Reports are available under:
+
+```bash
+build/reports/
+```
 
 ---
 
-## 📌 Roadmap (WIP)
+## 🗺 Roadmap
 
-### ✅ **Completed**
-- [x] Clean Architecture structure
-- [x] Domain layer with entities and value objects
-- [x] Application layer with use cases
-- [x] Infrastructure HTTP layer structure
-- [x] Unit tests for domain and application layers
-- [x] Code quality tools (Spotless, Checkstyle)
+### ✅ Completed
+- Clean Architecture foundation
+- Domain modeling with invariants
+- Explicit use cases
+- REST API with validation and error handling
+- PostgreSQL persistence
+- Flyway migrations
+- Docker Compose setup
+- Unit and integration tests
+- Code quality tooling
 
-### 🔄 **In Progress / Planned**
-- [ ] Create output ports (`application/port/output/`)
-- [ ] Integrate Spring Boot with HTTP controllers
-- [ ] Implement repository pattern for persistence
-- [ ] Define Kafka topics and schemas
-- [ ] Implement Kafka producers and consumers
-- [ ] Add idempotency strategy
-- [ ] Add DLQ consumer
-- [ ] Add integration tests with Testcontainers
-
----
-
-## 🤝 Contributing
-
-This repo is part of my professional portfolio but contributions (issues, suggestions, discussions) are welcome.
+### 🔄 Next Steps
+- Kafka topic design
+- Event publishing on transaction creation
+- Asynchronous processing module
+- DLQ handling
+- Outbox pattern implementation
 
 ---
 
 ## 📄 License
 
-MIT License — feel free to use this project for learning and inspiration.
+MIT License — free to use for learning and inspiration.
 
 ---
 
-## ⭐ If you like this project…
-
-Please give it a **star** on GitHub — it helps a lot! 🌟
+## ⭐ If you find this project useful or interesting, consider starring the repository.
