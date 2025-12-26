@@ -39,6 +39,41 @@ This service is responsible for **transaction ingestion and lifecycle tracking**
 
 ---
 
+## 🧠 Architectural Rationale
+
+This project was designed to demonstrate how a backend system can evolve incrementally while preserving architectural integrity.
+
+The core follows Clean Architecture principles, with a strict separation between domain, application, and infrastructure layers. The domain and use cases are completely framework-agnostic, allowing infrastructure concerns (HTTP, persistence, messaging) to change without impacting business rules.
+
+Instead of introducing Kafka and persistence upfront, the system was intentionally built in stages:
+- First, by modeling the domain and its invariants.
+- Then, by introducing persistence with PostgreSQL and Flyway.
+- And only afterwards, preparing the system for event-driven processing with Kafka.
+
+This approach mirrors real-world systems, where architecture must support continuous change rather than assume perfect requirements from day one.
+
+The goal is not to showcase as many technologies as possible, but to demonstrate conscious architectural decisions, low coupling, and a sustainable path for future evolution.
+
+## ⚖️ Design Trade-offs
+
+Some design decisions were made deliberately to balance simplicity, clarity, and future extensibility:
+
+- **No premature abstractions**  
+  The code avoids generic mappers, base repositories, or overly flexible interfaces until there is a real need. This keeps the codebase easy to read and reason about.
+
+- **Use cases as concrete classes**  
+  Application use cases are implemented as concrete classes instead of interfaces, reducing indirection and improving readability. Abstractions are introduced only when multiple implementations become necessary.
+
+- **Incremental persistence strategy**  
+  The project started with in-memory implementations and evolved to PostgreSQL using JPA and Flyway. This allowed the domain and application layers to stabilize before introducing infrastructure complexity.
+
+- **Test strategy aligned with evolution stage**  
+  The project combines pure unit tests for domain and application logic with slice tests for HTTP controllers. Full integration tests are introduced once infrastructure components become relevant.
+
+These trade-offs favor long-term maintainability and clear intent over architectural perfection or pattern-heavy designs.
+
+---
+
 ## 🧱 Architecture Overview
 
 The project follows **Clean Architecture**, enforcing strict dependency rules:
@@ -55,6 +90,23 @@ An architecture diagram is available at:
 
 ```
 docs/diagram.jpg
+```
+
+---
+## 🧪 Testing Strategy
+
+The project uses multiple testing layers to ensure correctness and confidence:
+
+- **Domain tests** — pure business rules
+- **Use case tests** — orchestration and behavior
+- **Resource tests (`@WebMvcTest`)** — HTTP contract, validation, error handling
+- **Integration tests** — real PostgreSQL using Testcontainers
+
+Run tests locally:
+
+```bash
+./gradlew test
+./gradlew integrationTest
 ```
 
 ---
@@ -117,24 +169,6 @@ src/main/java
 
 ---
 
-## 🧪 Testing Strategy
-
-The project uses multiple testing layers to ensure correctness and confidence:
-
-- **Domain tests** — pure business rules
-- **Use case tests** — orchestration and behavior
-- **Resource tests (`@WebMvcTest`)** — HTTP contract, validation, error handling
-- **Integration tests** — real PostgreSQL using Testcontainers
-
-Run tests locally:
-
-```bash
-./gradlew test
-./gradlew integrationTest
-```
-
----
-
 ## 🐳 Running with Docker Compose
 
 The application can be fully started locally using Docker Compose.
@@ -190,7 +224,7 @@ curl -X POST http://localhost:8081/transactions \
 ### Get transaction by ID
 Use the `id` returned by the create transaction endpoint.
 ```bash
-curl http://localhost:8081/transactions/{transactionId}
+curl -X GET http://localhost:8081/transactions/{transactionId}
 ```
 
 ---
