@@ -15,9 +15,9 @@ It demonstrates modern distributed-systems concepts used in fintech environments
 
 - **Clean Architecture** & Domain-Driven Design (DDD) principles
 - Framework-agnostic domain and application layers
-- Event-driven architecture (planned)
+- Event-driven architecture
 - Apache Kafka producers and consumers (planned)
-- Transaction persistence (planned)
+- Transaction persistence
 - Dead-letter queue (DLQ) handling (planned)
 - Outbox-style *"persist + publish"* atomic workflow (planned)
 
