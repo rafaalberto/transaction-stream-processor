@@ -25,7 +25,7 @@ import tools.jackson.databind.ObjectMapper;
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-class TransactionIntegrationTest extends AbstractIntegrationTest {
+class TransactionHttpIntegrationTest extends AbstractIntegrationTest {
 
   @Autowired private MockMvc mockMvc;
 

@@ -1,4 +1,4 @@
-package io.rafaalberto.transactionstreamprocessor.integration.http;
+package io.rafaalberto.transactionstreamprocessor.integration.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,7 +25,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
-class TransactionIdempotencyIntegrationTest extends AbstractIntegrationTest {
+class CreateTransactionIdempotencyIntegrationTest extends AbstractIntegrationTest {
 
   @Autowired private CreateTransactionUseCase createTransactionUseCase;
 
