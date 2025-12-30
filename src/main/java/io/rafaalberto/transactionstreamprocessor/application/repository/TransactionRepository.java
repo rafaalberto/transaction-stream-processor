@@ -8,4 +8,6 @@ public interface TransactionRepository {
   Transaction save(Transaction transaction);
 
   Optional<Transaction> findById(TransactionID id);
+
+  Optional<Transaction> findByExternalReference(String externalReference);
 }
