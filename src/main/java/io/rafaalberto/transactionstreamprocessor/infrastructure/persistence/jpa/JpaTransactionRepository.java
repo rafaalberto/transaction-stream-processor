@@ -31,4 +31,9 @@ public class JpaTransactionRepository implements TransactionRepository {
   public Optional<Transaction> findById(final TransactionID id) {
     return jpaRepository.findById(id.value()).map(mapper::toDomain);
   }
+
+  @Override
+  public Optional<Transaction> findByExternalReference(final String externalReference) {
+    return jpaRepository.findByExternalReference(externalReference).map(mapper::toDomain);
+  }
 }
