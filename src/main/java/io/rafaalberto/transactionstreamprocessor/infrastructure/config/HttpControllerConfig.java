@@ -1,5 +1,6 @@
 package io.rafaalberto.transactionstreamprocessor.infrastructure.config;
 
+import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionEventPublisher;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.GetTransactionByIdUseCase;
@@ -13,8 +14,9 @@ public class HttpControllerConfig {
 
   @Bean
   CreateTransactionUseCase createTransactionUseCase(
-      final TransactionRepository transactionRepository) {
-    return new CreateTransactionUseCase(transactionRepository);
+      final TransactionRepository transactionRepository,
+      final TransactionEventPublisher transactionPublisher) {
+    return new CreateTransactionUseCase(transactionRepository, transactionPublisher);
   }
 
   @Bean

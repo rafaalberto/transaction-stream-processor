@@ -3,9 +3,11 @@ package io.rafaalberto.transactionstreamprocessor.unit.application.usecases;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionEventPublisher;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionCommand;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
@@ -31,8 +33,9 @@ class CreateTransactionUseCaseTest {
         new CreateTransactionCommand(amount, currency, type, OCCURRED_AT, externalReference);
 
     var repository = mock(TransactionRepository.class);
+    var publisher = mock(TransactionEventPublisher.class);
 
-    var useCase = new CreateTransactionUseCase(repository);
+    var useCase = new CreateTransactionUseCase(repository, publisher);
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
     var transaction = useCase.execute(command);
@@ -47,5 +50,6 @@ class CreateTransactionUseCaseTest {
     assertThat(transaction.externalReference()).isEqualTo(externalReference);
 
     verify(repository).save(any());
+    verify(publisher, times(1)).publish(any());
   }
 }
