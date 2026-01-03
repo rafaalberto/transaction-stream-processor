@@ -3,6 +3,7 @@ package io.rafaalberto.transactionstreamprocessor.unit.application.usecases;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,5 +50,6 @@ class CreateTransactionUseCaseTest {
     assertThat(transaction.externalReference()).isEqualTo(externalReference);
 
     verify(repository).save(any());
+    verify(publisher, times(1)).publish(any());
   }
 }
