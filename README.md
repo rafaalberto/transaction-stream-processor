@@ -169,6 +169,22 @@ src/main/java
 
 ---
 
+## 🧑‍💻 Running Locally (Development Mode)
+
+For local development, the application is typically run directly from the IDE
+(IntelliJ, VS Code, etc.), while infrastructure dependencies are provided via Docker.
+
+### Infrastructure (PostgreSQL + Kafka)
+
+Start only the required infrastructure services:
+
+```bash
+docker compose -f docker-compose.dev.yml up
+
+SPRING_PROFILES_ACTIVE=local,kafka ./gradlew bootRun
+```
+
+---
 ## 🐳 Running with Docker Compose
 
 The application can be fully started locally using Docker Compose.
