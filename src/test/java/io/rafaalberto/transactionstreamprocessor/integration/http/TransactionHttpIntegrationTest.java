@@ -10,7 +10,7 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
-import io.rafaalberto.transactionstreamprocessor.integration.config.AbstractIntegrationTest;
+import io.rafaalberto.transactionstreamprocessor.integration.config.PostgresInitializer;
 import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -19,13 +19,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@ContextConfiguration(initializers = {PostgresInitializer.class})
 @AutoConfigureMockMvc
-class TransactionHttpIntegrationTest extends AbstractIntegrationTest {
+class TransactionHttpIntegrationTest {
 
   @Autowired private MockMvc mockMvc;
 
