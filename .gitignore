@@ -70,3 +70,5 @@ zookeeper/
 # ---------------------------------------
 test-output/
 hs_err_pid*
+
+.cursor

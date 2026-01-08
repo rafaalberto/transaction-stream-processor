@@ -1,12 +1,17 @@
 package io.rafaalberto.transactionstreamprocessor.integration.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import io.rafaalberto.transactionstreamprocessor.application.events.TransactionCreatedEvent;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionCommand;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import io.rafaalberto.transactionstreamprocessor.integration.config.KafkaInitializer;
+import io.rafaalberto.transactionstreamprocessor.integration.config.KafkaTestConsumer;
 import io.rafaalberto.transactionstreamprocessor.integration.config.PostgresInitializer;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -16,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "kafka"})
 @ContextConfiguration(initializers = {PostgresInitializer.class, KafkaInitializer.class})
 class TransactionCreatedEventKafkaIntegrationTest {
 
@@ -33,7 +38,23 @@ class TransactionCreatedEventKafkaIntegrationTest {
             Instant.now(),
             externalReference);
 
-    // when
     createTransactionUseCase.execute(command);
+
+    try (var consumer =
+        new KafkaTestConsumer<>(
+            KafkaInitializer.KAFKA.getBootstrapServers(),
+            "transactions.created",
+            TransactionCreatedEvent.class)) {
+
+      var events = consumer.poll(Duration.ofSeconds(5));
+
+      assertThat(events).hasSize(1);
+
+      TransactionCreatedEvent event = events.getFirst();
+
+      assertThat(event.externalReference()).isEqualTo(externalReference);
+      assertThat(event.currency()).isEqualTo(Currency.BRL);
+      assertThat(event.type()).isEqualTo(TransactionType.CREDIT);
+    }
   }
 }
