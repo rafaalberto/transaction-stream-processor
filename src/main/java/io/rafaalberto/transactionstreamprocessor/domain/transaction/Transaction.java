@@ -61,6 +61,21 @@ public final class Transaction {
         transactionID, money, type, occurredAt, createdAt, status, externalReference);
   }
 
+  public Transaction process() {
+    if (this.status != TransactionStatus.CREATED) {
+      throw new InvalidTransactionException(
+          "Only CREATED transactions can be processed. Current status: " + status);
+    }
+    return new Transaction(
+        this.id,
+        this.money,
+        this.type,
+        this.occurredAt,
+        this.createdAt,
+        TransactionStatus.PROCESSED,
+        this.externalReference);
+  }
+
   public TransactionID id() {
     return id;
   }
