@@ -14,6 +14,7 @@ import io.rafaalberto.transactionstreamprocessor.integration.config.PostgresInit
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ class TransactionCreatedEventKafkaIntegrationTest {
             KafkaTopics.TRANSACTIONS_CREATED,
             TransactionCreatedEvent.class)) {
 
-      var events = consumer.poll(Duration.ofSeconds(5));
+      var events = awaitMessages(consumer, Duration.ofSeconds(10), 1);
 
       assertThat(events).hasSize(1);
 
@@ -57,5 +58,20 @@ class TransactionCreatedEventKafkaIntegrationTest {
       assertThat(event.currency()).isEqualTo(Currency.BRL);
       assertThat(event.type()).isEqualTo(TransactionType.CREDIT);
     }
+  }
+
+  private <T> List<T> awaitMessages(
+      final KafkaTestConsumer<T> consumer, final Duration timeout, final int expected) {
+    long deadline = System.currentTimeMillis() + timeout.toMillis();
+    List<T> records = List.of();
+
+    while (System.currentTimeMillis() < deadline) {
+      records = consumer.poll(Duration.ofSeconds(1));
+      if (records.size() >= expected) {
+        return records;
+      }
+    }
+
+    return records;
   }
 }
