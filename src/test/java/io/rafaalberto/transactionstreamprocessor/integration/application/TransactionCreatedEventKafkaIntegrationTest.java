@@ -7,6 +7,7 @@ import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTran
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
+import io.rafaalberto.transactionstreamprocessor.infrastructure.config.KafkaTopics;
 import io.rafaalberto.transactionstreamprocessor.integration.config.KafkaInitializer;
 import io.rafaalberto.transactionstreamprocessor.integration.config.KafkaTestConsumer;
 import io.rafaalberto.transactionstreamprocessor.integration.config.PostgresInitializer;
@@ -43,7 +44,7 @@ class TransactionCreatedEventKafkaIntegrationTest {
     try (var consumer =
         new KafkaTestConsumer<>(
             KafkaInitializer.KAFKA.getBootstrapServers(),
-            "transactions.created",
+            KafkaTopics.TRANSACTIONS_CREATED,
             TransactionCreatedEvent.class)) {
 
       var events = consumer.poll(Duration.ofSeconds(5));

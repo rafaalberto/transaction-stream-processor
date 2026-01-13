@@ -2,6 +2,7 @@ package io.rafaalberto.transactionstreamprocessor.infrastructure.messaging.publi
 
 import io.rafaalberto.transactionstreamprocessor.application.events.TransactionCreatedEvent;
 import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionEventPublisher;
+import io.rafaalberto.transactionstreamprocessor.infrastructure.config.KafkaTopics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -17,8 +18,6 @@ public class KafkaTransactionEventPublisher implements TransactionEventPublisher
 
   private final KafkaTemplate<String, TransactionCreatedEvent> kafkaTemplate;
 
-  private static final String TOPIC = "transactions.created";
-
   public KafkaTransactionEventPublisher(
       final KafkaTemplate<String, TransactionCreatedEvent> kafkaTemplate) {
     this.kafkaTemplate = kafkaTemplate;
@@ -27,7 +26,7 @@ public class KafkaTransactionEventPublisher implements TransactionEventPublisher
   @Override
   public void publish(final TransactionCreatedEvent event) {
     kafkaTemplate
-        .send(TOPIC, event.externalReference(), event)
+        .send(KafkaTopics.TRANSACTIONS_CREATED, event.externalReference(), event)
         .whenComplete(
             (result, exception) -> {
               if (exception != null) {
