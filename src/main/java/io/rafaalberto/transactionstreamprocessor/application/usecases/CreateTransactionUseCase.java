@@ -5,7 +5,6 @@ import io.rafaalberto.transactionstreamprocessor.application.publisher.Transacti
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
-import org.springframework.dao.DataIntegrityViolationException;
 
 public final class CreateTransactionUseCase {
 
@@ -24,26 +23,20 @@ public final class CreateTransactionUseCase {
         .findByExternalReference(command.externalReference())
         .orElseGet(
             () -> {
-              var transactionPersisted = saveTransaction(command);
+              var transactionPersisted = createTransaction(command);
               publishTransaction(transactionPersisted);
               return transactionPersisted;
             });
   }
 
-  private Transaction saveTransaction(final CreateTransactionCommand command) {
-    try {
-      var transaction =
-          Transaction.create(
-              new Money(command.amount(), command.currency()),
-              command.type(),
-              command.occurredAt(),
-              command.externalReference());
-      return transactionRepository.save(transaction);
-    } catch (DataIntegrityViolationException exception) {
-      return transactionRepository
-          .findByExternalReference(command.externalReference())
-          .orElseThrow();
-    }
+  private Transaction createTransaction(final CreateTransactionCommand command) {
+    var transaction =
+        Transaction.create(
+            new Money(command.amount(), command.currency()),
+            command.type(),
+            command.occurredAt(),
+            command.externalReference());
+    return transactionRepository.save(transaction);
   }
 
   private void publishTransaction(final Transaction transaction) {
