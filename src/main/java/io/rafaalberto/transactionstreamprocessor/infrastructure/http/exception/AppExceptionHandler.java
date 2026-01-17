@@ -1,5 +1,6 @@
-package io.rafaalberto.transactionstreamprocessor.infrastructure.http.advice;
+package io.rafaalberto.transactionstreamprocessor.infrastructure.http.exception;
 
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.InvalidTransactionException;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.TransactionNotFoundException;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.resource.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
@@ -99,5 +100,10 @@ public class AppExceptionHandler {
         .body(
             new ErrorResponse(
                 "Transaction not found", List.of(exception.getMessage()), Instant.now()));
+  }
+
+  @ExceptionHandler(InvalidTransactionException.class)
+  public ResponseEntity<String> handleInvalidTransaction(final InvalidTransactionException ex) {
+    return ResponseEntity.badRequest().body(ex.getMessage());
   }
 }
