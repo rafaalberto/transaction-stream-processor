@@ -4,9 +4,13 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
 import java.time.Instant;
 import java.util.UUID;
 
-public record TransactionProcessedEvent(UUID transactionId, String status, Instant processedAt) {
+public record TransactionProcessedEvent(
+    UUID transactionId, String status, Instant processedAt, String externalReference) {
   public static TransactionProcessedEvent from(final Transaction transaction) {
     return new TransactionProcessedEvent(
-        transaction.id().value(), transaction.status().toString(), transaction.occurredAt());
+        transaction.id().value(),
+        transaction.status().toString(),
+        transaction.occurredAt(),
+        transaction.externalReference());
   }
 }
