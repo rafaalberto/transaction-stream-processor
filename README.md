@@ -281,11 +281,10 @@ build/reports/
 - Docker Compose setup
 - Unit and integration tests
 - Code quality tooling
-
-### 🔄 Next Steps
 - Kafka topic design
 - Event publishing on transaction creation
-- Asynchronous processing module
+
+### 🔄 Next Steps
 - DLQ handling
 - Outbox pattern implementation
 
