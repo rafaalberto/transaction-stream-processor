@@ -1,8 +1,12 @@
 package io.rafaalberto.transactionstreamprocessor.integration.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 
 import io.rafaalberto.transactionstreamprocessor.application.events.TransactionCreatedEvent;
+import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionProcessedEventPublisher;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
@@ -23,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
 @ActiveProfiles({"test", "kafka"})
@@ -32,6 +37,8 @@ class TransactionCreatedEventConsumerIntegrationTest {
   @Autowired private KafkaTemplate<String, TransactionCreatedEvent> kafkaTemplate;
 
   @Autowired private TransactionRepository transactionRepository;
+
+  @MockitoBean private TransactionProcessedEventPublisher transactionProcessedPublisher;
 
   private static final Instant OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
 
@@ -64,6 +71,8 @@ class TransactionCreatedEventConsumerIntegrationTest {
                   transactionRepository.findById(transaction.id()).orElseThrow();
 
               assertThat(processed.status()).isEqualTo(TransactionStatus.PROCESSED);
+
+              verify(transactionProcessedPublisher, atLeastOnce()).publish(any());
             });
   }
 }
