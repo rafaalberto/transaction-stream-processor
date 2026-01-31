@@ -23,6 +23,7 @@ import io.rafaalberto.transactionstreamprocessor.infrastructure.http.response.Tr
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.response.TransactionResponse;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -183,6 +184,7 @@ class TransactionResourceTest {
     var amount = BigDecimal.valueOf(100);
     var currency = Currency.BRL;
     var status = TransactionStatus.CREATED.name();
+    var externalReference = "external-reference-" + UUID.randomUUID();
 
     var response =
         new TransactionDetailsResponse(
@@ -190,7 +192,8 @@ class TransactionResourceTest {
             new MoneyResponse(amount, currency.name()),
             status,
             OCCURRED_AT,
-            CREATED_AT);
+            CREATED_AT,
+            externalReference);
 
     when(getTransactionByIdController.findById(any(TransactionID.class))).thenReturn(response);
 

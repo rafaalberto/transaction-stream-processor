@@ -5,7 +5,12 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record TransactionDetailsResponse(
-    UUID id, MoneyResponse money, String status, Instant occurredAt, Instant createdAt) {
+    UUID id,
+    MoneyResponse money,
+    String status,
+    Instant occurredAt,
+    Instant createdAt,
+    String externalReference) {
 
   public static TransactionDetailsResponse from(final Transaction transaction) {
     return new TransactionDetailsResponse(
@@ -13,6 +18,7 @@ public record TransactionDetailsResponse(
         new MoneyResponse(transaction.money().amount(), transaction.money().currency().name()),
         transaction.status().name(),
         transaction.occurredAt(),
-        transaction.createdAt());
+        transaction.createdAt(),
+        transaction.externalReference());
   }
 }
