@@ -86,22 +86,41 @@ tasks.withType<Test>().configureEach {
 }
 
 tasks.test {
-	useJUnitPlatform()
-	exclude("**/integration/**")
-	exclude("**/*IntegrationTest.java")
+    exclude("**/integration/**")
+    exclude("**/acceptance/**")
+    exclude("**/*IntegrationTest.java")
+    exclude("**/*AcceptanceTest.java")
 }
 
 tasks.register<Test>("integrationTest") {
-	testClassesDirs = sourceSets.test.get().output.classesDirs
-	classpath = sourceSets.test.get().runtimeClasspath
-	useJUnitPlatform()
-	include("**/integration/**")
-	include("**/*IntegrationTest.java")
-	shouldRunAfter(tasks.test)
+    description = "Runs integration tests"
+    group = "verification"
+
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+
+    include("**/integration/**")
+    include("**/*IntegrationTest.java")
+
+    shouldRunAfter(tasks.test)
+}
+
+tasks.register<Test>("acceptanceTest") {
+    description = "Runs acceptance tests"
+    group = "verification"
+
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+
+    include("**/acceptance/**")
+    include("**/*AcceptanceTest.java")
+
+    shouldRunAfter(tasks.named("integrationTest"))
 }
 
 tasks.named("check") {
 	dependsOn("spotlessCheck")
 	dependsOn(tasks.named("checkstyleMain"), tasks.named("checkstyleTest"))
 	dependsOn("integrationTest")
+    dependsOn("acceptanceTest")
 }
