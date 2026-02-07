@@ -7,31 +7,34 @@ This document describes the folder structure and organization of the Transaction
 ```
 src/main/java/io/rafaalberto/transactionstreamprocessor/
 ├── domain/                        # Core business logic (innermost layer)
-│   ├── entity/                    # Domain entities and value objects
-│   └── exception/                 # Domain-specific exceptions
-│   └── service/                   # (planned) Domain services
+│   └── transaction/
+│       ├── Transaction            # Domain entity
+│       ├── TransactionID          # Value object
+│       ├── Money                   # Value object
+│       ├── Currency                # Value object
+│       ├── TransactionStatus       # Value object
+│       ├── TransactionType         # Value object
+│       └── exception/              # Domain-specific exceptions
 │
 ├── application/                   # Use cases and application logic
-│   ├── usecases/                  # Use case implementations
-│   ├── port/                      # (planned) Ports (interfaces for adapters)
-│   │   ├── input/                 # (planned) Input ports (use case interfaces)
-│   │   └── output/                # (planned) Output ports (repository, messaging interfaces)
-│   └── dto/                       # (planned) Application DTOs (if needed)
+│   ├── events/                    # Application events (DTOs for messaging)
+│   ├── publisher/                 # Output ports (event publishers)
+│   ├── repository/                # Output port (persistence)
+│   └── usecases/                  # Use case implementations + commands
 │
 └── infrastructure/                # External concerns (outer layer)
+    ├── config/                    # Spring and infrastructure configuration
     ├── http/                      # HTTP/REST adapters
-    │   ├── controller/            # HTTP controllers
+    │   ├── controller/            # Controllers (delegate to use cases)
+    │   ├── exception/             # Global exception handling
     │   ├── request/               # Request DTOs
+    │   ├── resource/              # REST entrypoints
     │   └── response/              # Response DTOs
-    ├── persistence/               # (planned) Database implementations
-    │   ├── entity/                # (planned) JPA entities (if using JPA)
-    │   ├── repository/            # (planned) Repository implementations
-    │   └── mapper/                # (planned) Entity-Domain mappers
-    ├── messaging/                 # (planned) Kafka producers/consumers
-    │   ├── producer/              # (planned) Event producers
-    │   ├── consumer/              # (planned) Event consumers
-    │   └── config/                # (planned) Kafka configuration
-    └── config/                    # (planned) Infrastructure configuration
+    ├── messaging/                 # Kafka producers and consumers
+    │   ├── consumer/              # Kafka listeners
+    │   └── publisher/             # Kafka producer implementations
+    └── persistence/               # Database implementations
+        └── jpa/                   # JPA entities, repository, mapper
 ```
 
 ## 🎯 Layer Descriptions
@@ -40,11 +43,9 @@ src/main/java/io/rafaalberto/transactionstreamprocessor/
 
 **Purpose:** Contains the core business logic and rules that are completely independent of frameworks, databases, and external systems.
 
-**Why this name:**
-- **`domain/`**: Represents the business domain - the heart of your application
-- **`entity/`**: Contains domain entities and value objects that represent core business concepts
-- **`service/`**: (Planned) Domain services - business logic that doesn't naturally fit within a single entity
-- **`exception/`**: Domain-specific exceptions that represent business rule violations
+**Structure:**
+- **`domain/transaction/`**: Holds the transaction aggregate: entity, value objects, and domain exceptions in one place.
+- **`exception/`**: Domain-specific exceptions that represent business rule violations (`InvalidTransactionException`, `TransactionNotFoundException`).
 
 **Key Principles:**
 - No dependencies on external frameworks
@@ -53,83 +54,66 @@ src/main/java/io/rafaalberto/transactionstreamprocessor/
 - Contains the most stable and reusable code
 
 **Example contents (implemented):**
-- `Transaction` entity
-- `TransactionID` value object
-- `InvalidTransactionException` domain exception
-
-**Example contents (planned):**
-- Additional domain services (e.g., `TransactionValidator`)
+- `Transaction` entity (with `create`, `restore`, `process`)
+- Value objects: `TransactionID`, `Money`, `Currency`, `TransactionStatus`, `TransactionType`
+- Domain exceptions: `InvalidTransactionException`, `TransactionNotFoundException`
 
 ---
 
 ### 2. `application/` - Use Cases and Application Logic
 
-**Purpose:** Orchestrates use cases and defines the application's behavior. Acts as a bridge between the domain and infrastructure layers.
+**Purpose:** Orchestrates use cases and defines the application's behavior. Acts as a bridge between the domain and infrastructure layers. Defines ports (interfaces) that infrastructure implements.
 
-**Why this name:**
-- **`application/`**: Represents the application layer that orchestrates business workflows
-- **`usecases/`**: Contains use case implementations (e.g., `CreateTransactionUseCase`)
-- **`port/`**: (Planned) Defines interfaces (ports) that the application needs
-  - **`input/`**: (Planned) Input ports - interfaces that use cases implement (driven by adapters)
-  - **`output/`**: (Planned) Output ports - interfaces for repositories, messaging, etc. (implemented by infrastructure)
-- **`dto/`**: (Planned) Application-level DTOs if needed (though prefer domain objects when possible)
+**Structure:**
+- **`events/`**: Application events used for messaging (`TransactionCreatedEvent`, `TransactionProcessedEvent`).
+- **`publisher/`**: Output ports for publishing events (`TransactionEventPublisher`, `TransactionProcessedEventPublisher`).
+- **`repository/`**: Output port for persistence (`TransactionRepository`).
+- **`usecases/`**: Use case implementations and their commands (e.g., `CreateTransactionUseCase`, `CreateTransactionCommand`, `GetTransactionByIdUseCase`, `ProcessTransactionUseCase`).
 
 **Key Principles:**
 - Depends only on `domain/`
 - Contains orchestration logic, not business rules
 - Business rules stay in `domain/`
+- Ports are interfaces; infrastructure provides implementations
 
 **Example contents (implemented):**
-- `CreateTransactionUseCase`
-- `CreateTransactionCommand`
-
-**Example contents (planned):**
-- `TransactionRepository` (output port interface)
-- `EventPublisher` (output port interface)
-- Input port interfaces (e.g., `CreateTransactionUseCase` as an interface)
+- Use cases: `CreateTransactionUseCase`, `GetTransactionByIdUseCase`, `ProcessTransactionUseCase`
+- Commands: `CreateTransactionCommand`
+- Ports: `TransactionRepository`, `TransactionEventPublisher`, `TransactionProcessedEventPublisher`
+- Events: `TransactionCreatedEvent`, `TransactionProcessedEvent`
 
 ---
 
 ### 3. `infrastructure/` - External Concerns (Outer Layer)
 
-**Purpose:** Implements all external dependencies and framework-specific code. This is where you interact with databases, message brokers, HTTP interfaces, file systems, etc.
+**Purpose:** Implements all external dependencies and framework-specific code. This is where you interact with databases, message brokers, HTTP interfaces, etc.
 
-**Why this name:**
-- **`infrastructure/`**: Represents the technical infrastructure layer
-- **`http/`**: HTTP/REST adapters (interface adapters for web APIs)
-  - **`controller/`**: HTTP controllers (ready to be annotated with Spring `@RestController` later)
-  - **`request/`**: Request DTOs for API contracts
-  - **`response/`**: Response DTOs for API contracts
-- **`persistence/`**: (Planned) Database-related implementations
-  - **`entity/`**: (Planned) JPA entities (database representation, separate from domain entities)
-  - **`repository/`**: (Planned) Concrete repository implementations (implements output ports from `application/port/output/`)
-  - **`mapper/`**: (Planned) Converts between JPA entities and domain entities
-- **`messaging/`**: (Planned) Kafka-related implementations
-  - **`producer/`**: (Planned) Event producers that publish to Kafka
-  - **`consumer/`**: (Planned) Event consumers that process Kafka messages
-  - **`config/`**: (Planned) Kafka configuration classes
-- **`config/`**: (Planned) Infrastructure configuration (database config, connection pools, etc.)
+**Structure:**
+- **`config/`**: Spring and infrastructure configuration (use cases, HTTP, JPA, Kafka topics and consumer config).
+- **`http/`**: HTTP/REST adapters
+  - **`resource/`**: REST entrypoints (`TransactionResource`)
+  - **`controller/`**: Controllers that map request/response and delegate to use cases
+  - **`request/`**, **`response/`**: Request and response DTOs
+  - **`exception/`**: Global exception handling (`AppExceptionHandler`, `ErrorResponse`)
+- **`persistence/jpa/`**: Database implementation
+  - **`TransactionEntity`**: JPA entity
+  - **`JpaTransactionRepository`**: Implements `TransactionRepository`
+  - **`TransactionEntityMapper`**: Maps between entity and domain
+- **`messaging/`**: Kafka producers and consumers
+  - **`publisher/`**: `KafkaTransactionEventPublisher`, `KafkaTransactionProcessedPublisher`, `LogTransactionEventPublisher` (profile-based)
+  - **`consumer/`**: `TransactionCreatedEventConsumer` (consumes events, runs `ProcessTransactionUseCase`, publishes processed event)
 
-**Key Principles (current state):**
-- Only the `http/` layer is implemented
-- HTTP controllers are thin and delegate to use cases
-- HTTP DTOs live in `request/` and `response/`
-- Business logic stays in `domain/` and `application/`
-
-**Key Principles (planned):**
-- Persistence and messaging implementations will live under `persistence/` and `messaging/`
-- Infrastructure will implement ports defined in `application/port/output/`
-- Infrastructure can depend on frameworks (Spring, JPA, Kafka)
+**Key Principles:**
+- HTTP, persistence, and messaging are all implemented.
+- REST resources and controllers are thin and delegate to use cases.
+- Infrastructure implements the ports defined in `application/` (repository, publishers).
+- Infrastructure can depend on frameworks (Spring, JPA, Kafka).
 
 **Example contents (implemented):**
-- `TransactionController` (HTTP entrypoint)
-- `CreateTransactionRequest`, `TransactionResponse` (HTTP DTOs)
-
-**Example contents (planned):**
-- `JpaTransactionRepository` (implements `TransactionRepository` port)
-- `KafkaTransactionProducer` (implements `EventPublisher` port)
-- `TransactionEntity` (JPA entity)
-- `TransactionEntityMapper`
+- HTTP: `TransactionResource`, `CreateTransactionController`, `GetTransactionByIdController`, `AppExceptionHandler`, `CreateTransactionRequest`, `TransactionResponse`, `TransactionDetailsResponse`, `ErrorResponse`
+- Persistence: `JpaTransactionRepository`, `TransactionEntity`, `TransactionEntityMapper`, `TransactionJpaRepository`
+- Messaging: `KafkaTransactionEventPublisher`, `KafkaTransactionProcessedPublisher`, `TransactionCreatedEventConsumer`, `KafkaTopics`, `KafkaConsumerConfig`
+- Config: `ApplicationUseCaseConfig`, `HttpControllerConfig`, `JpaPersistenceConfig`
 
 ---
 
@@ -155,51 +139,43 @@ This ensures that:
 
 ---
 
-## 🔄 Data Flow Example
+## 🔄 Data Flow
 
-### Ingesting a Transaction (current implementation):
+### Flow A – Creating a transaction (HTTP)
 
-1. **`infrastructure/http/controller/TransactionController`**
-   - Receives an HTTP-like request (no framework wiring yet)
-   - Maps `CreateTransactionRequest` to `CreateTransactionCommand`
-   - Calls use case from `application/usecases/`
+1. **`infrastructure/http/resource/TransactionResource`**
+   - Receives HTTP POST at `/transactions`, delegates to `CreateTransactionController`.
 
-2. **`application/usecases/CreateTransactionUseCase`**
-   - Orchestrates the transaction creation workflow
-   - Creates domain entity (which validates business rules)
-   - Returns the `Transaction` to the controller
+2. **`infrastructure/http/controller/CreateTransactionController`**
+   - Maps `CreateTransactionRequest` to `CreateTransactionCommand`, calls `CreateTransactionUseCase.execute`.
 
-3. **`domain/entity/Transaction`**
-   - Validates transaction business rules during construction
-   - Throws domain exceptions if invalid
+3. **`application/usecases/CreateTransactionUseCase`**
+   - Optionally finds existing by `externalReference` (idempotency).
+   - Builds `Transaction` via `Transaction.create(...)` (domain validates).
+   - Saves via `TransactionRepository.save` and publishes via `TransactionEventPublisher.publish`.
 
-4. **`infrastructure/http/controller/TransactionController`**
-   - Maps the `Transaction` to `TransactionResponse`
-   - Returns the response DTO
+4. **Infrastructure**
+   - **Persistence:** `JpaTransactionRepository` persists the transaction.
+   - **Messaging:** When profile `kafka` is active, `KafkaTransactionEventPublisher` publishes `TransactionCreatedEvent` to Kafka.
 
-### Ingesting a Transaction (planned full flow):
+5. **Back to HTTP**
+   - Controller maps `Transaction` to `TransactionResponse`; resource returns 201 with the response body.
 
-1. **`infrastructure/http/controller/TransactionController`**
-   - Receives HTTP POST request (via Spring MVC)
-   - Maps `CreateTransactionRequest` to `CreateTransactionCommand`
-   - Calls use case from `application/usecases/`
+### Flow B – Processing a transaction (async, Kafka)
 
-2. **`application/usecases/CreateTransactionUseCase`**
-   - Orchestrates the transaction creation workflow
-   - Uses domain entities and services to enforce business rules
-   - Calls output ports (repository, event publisher)
+1. **`infrastructure/messaging/consumer/TransactionCreatedEventConsumer`**
+   - Consumes `TransactionCreatedEvent` from the Kafka topic (profile `kafka`).
 
-3. **`domain/entity/Transaction`**
-   - Validates transaction business rules during construction
-   - Throws domain exceptions if invalid
+2. **Consumer**
+   - Calls `ProcessTransactionUseCase.execute(transactionId)`.
 
-4. **`infrastructure/persistence/repository/JpaTransactionRepository`**
-   - (Planned) Implements `TransactionRepository` port (from `application/port/output/`)
-   - (Planned) Persists transaction to database
+3. **`application/usecases/ProcessTransactionUseCase`**
+   - Loads transaction via `TransactionRepository.findById`, calls `transaction.process()` (domain enforces CREATED → PROCESSED), saves the updated transaction.
 
-5. **`infrastructure/messaging/producer/KafkaTransactionProducer`**
-   - (Planned) Implements `EventPublisher` port (from `application/port/output/`)
-   - (Planned) Publishes event to Kafka topic
+4. **Consumer**
+   - Builds `TransactionProcessedEvent` from the processed transaction and publishes it via `TransactionProcessedEventPublisher` (Kafka implementation).
+
+**Next (planned):** DLQ for consumer failures; Outbox pattern for atomic persist + publish on creation.
 
 ---
 
