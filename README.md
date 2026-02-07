@@ -16,7 +16,7 @@ This project is intentionally built as a **portfolio-grade system**, focusing on
 
 It demonstrates real-world backend engineering practices commonly used in fintech and distributed systems, including clean boundaries, strong validation, explicit use cases, and production-style testing.
 
-> ⚠️ This project is a **work in progress by design**. Kafka-based event streaming and asynchronous processing are planned next.
+> ⚠️ This project is a **work in progress by design**. DLQ handling and the Outbox pattern are planned next.
 
 ---
 
@@ -28,12 +28,14 @@ This service is responsible for **transaction ingestion and lifecycle tracking**
 - Accepts transaction creation requests via HTTP
 - Validates input at API and domain boundaries
 - Persists transactions in PostgreSQL
+- Publishes transaction-created events to Kafka (when profile `kafka` is active)
+- Consumes those events and processes transactions asynchronously (CREATED → PROCESSED)
+- Publishes transaction-processed events after processing
 - Allows querying transactions by ID
 - Exposes consistent and user-friendly error responses
+- Idempotent creation via `externalReference`
 
 ### What it will do next
-- Publish transaction events to Kafka
-- Process transactions asynchronously
 - Handle failures using DLQ patterns
 - Guarantee atomic persist + publish using the Outbox pattern
 
@@ -48,7 +50,8 @@ The core follows Clean Architecture principles, with a strict separation between
 Instead of introducing Kafka and persistence upfront, the system was intentionally built in stages:
 - First, by modeling the domain and its invariants.
 - Then, by introducing persistence with PostgreSQL and Flyway.
-- And only afterwards, preparing the system for event-driven processing with Kafka.
+- Then, event-driven processing with Kafka (publish on create, consume and process, publish processed).
+- Next: DLQ and Outbox for resilience and atomicity.
 
 This approach mirrors real-world systems, where architecture must support continuous change rather than assume perfect requirements from day one.
 
@@ -100,13 +103,15 @@ The project uses multiple testing layers to ensure correctness and confidence:
 - **Domain tests** — pure business rules
 - **Use case tests** — orchestration and behavior
 - **Resource tests (`@WebMvcTest`)** — HTTP contract, validation, error handling
-- **Integration tests** — real PostgreSQL using Testcontainers
+- **Integration tests** — real PostgreSQL and Kafka using Testcontainers
+- **Acceptance tests** — full flow: HTTP create → Kafka → processing → PROCESSED status
 
 Run tests locally:
 
 ```bash
 ./gradlew test
 ./gradlew integrationTest
+./gradlew acceptanceTest
 ```
 
 ---
@@ -122,25 +127,32 @@ src/main/java
 │   ├─ Money
 │   ├─ Currency
 │   ├─ TransactionStatus
+│   ├─ TransactionType
 │   └─ exception
 │
 ├─ application
+│ ├─ events
+│ ├─ publisher
+│ ├─ repository
 │ ├─ usecases
-│ │ ├─ CreateTransactionUseCase
-│ │ └─ GetTransactionByIdUseCase
-│ └─ repository
-│   └─ TransactionRepository
+│ │   ├─ CreateTransactionUseCase
+│ │   ├─ GetTransactionByIdUseCase
+│ │   └─ ProcessTransactionUseCase
+│   └─ (commands)
 │
 └─ infrastructure
+  ├─ config
   ├─ http
-  │ ├─ resource
-  │ ├─ controller
-  │ ├─ request
-  │ ├─ response
-  │ └─ advice
+  │   ├─ resource
+  │   ├─ controller
+  │   ├─ request
+  │   ├─ response
+  │   └─ exception
+  ├─ messaging
+  │   ├─ consumer
+  │   └─ publisher
   └─ persistence
-    ├─ jpa
-    └─ flyway
+      └─ jpa
 ```
 
 ---
@@ -154,16 +166,16 @@ src/main/java
 - **PostgreSQL**
 - **Spring Data JPA**
 - **Flyway**
+- **Apache Kafka** (Spring Kafka)
 - **Docker & Docker Compose**
 - **JUnit 5**
 - **Mockito**
 - **AssertJ**
-- **Testcontainers**
+- **Testcontainers** (PostgreSQL, Kafka)
 - **Spotless**
 - **Checkstyle**
 
 ### Planned
-- **Apache Kafka**
 - **Dead Letter Queue (DLQ)**
 - **Outbox Pattern**
 
@@ -195,6 +207,7 @@ The application can be fully started locally using Docker Compose.
 - Available ports:
   - `8081` for the application
   - `5433` for PostgreSQL
+  - `9092` for Kafka (when using full stack)
 
 ### Start services
 
@@ -278,15 +291,15 @@ build/reports/
 - REST API with validation and error handling
 - PostgreSQL persistence
 - Flyway migrations
-- Docker Compose setup
-- Unit and integration tests
+- Docker Compose setup (PostgreSQL + Kafka)
+- Unit, integration, and acceptance tests
 - Code quality tooling
-- Kafka topic design
-- Event publishing on transaction creation
+- Kafka: event publishing on transaction creation, consumer for async processing, transaction-processed events
+- Idempotent creation via external reference
 
 ### 🔄 Next Steps
-- DLQ handling
-- Outbox pattern implementation
+- DLQ handling for failed messages
+- Outbox pattern for atomic persist + publish
 
 ---
 
