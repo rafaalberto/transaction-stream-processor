@@ -191,7 +191,7 @@ For local development, the application is typically run directly from the IDE
 Start only the required infrastructure services:
 
 ```bash
-docker compose -f docker-compose-dev.yml up
+docker compose -f docker-compose.app.yml up
 
 SPRING_PROFILES_ACTIVE=local,kafka ./gradlew bootRun
 ```
