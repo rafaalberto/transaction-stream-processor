@@ -81,9 +81,7 @@ These trade-offs favor long-term maintainability and clear intent over architect
 
 The project follows **Clean Architecture**, enforcing strict dependency rules:
 
-```
-domain → application → infrastructure
-```
+    domain → application → infrastructure
 
 - **Domain**: pure business logic, no framework dependencies  
 - **Application**: use cases and orchestration  
@@ -91,32 +89,7 @@ domain → application → infrastructure
 
 An architecture diagram is available at:
 
-```
-docs/diagram.jpg
-```
-
----
-## 🧪 Testing Strategy
-
-The project uses multiple testing layers to ensure correctness and confidence:
-
-- **Domain tests** — pure business rules
-- **Use case tests** — orchestration and behavior
-- **Resource tests (`@WebMvcTest`)** — HTTP contract, validation, error handling
-- **Integration tests** — real PostgreSQL and Kafka using Testcontainers
-- **Acceptance tests** — full flow: HTTP create → Kafka → processing → PROCESSED status
-
-Run tests locally:
-
-```bash
-./gradlew test
-./gradlew integrationTest
-./gradlew acceptanceTest
-```
-
----
-
-## 🏗 Project Structure
+    docs/diagram.jpg
 
 ```
 src/main/java
@@ -183,52 +156,61 @@ src/main/java
 
 ## 🧑‍💻 Running Locally (Development Mode)
 
-For local development, the application is typically run directly from the IDE
-(IntelliJ, VS Code, etc.), while infrastructure dependencies are provided via Docker.
+For day-to-day development, the application runs directly from the IDE while infrastructure dependencies are provided via Docker.
 
-### Infrastructure (PostgreSQL + Kafka)
+### 1️⃣ Start infrastructure (PostgreSQL + Kafka)
 
-Start only the required infrastructure services:
+``` bash
+docker compose up -d
+```
 
-```bash
-docker compose -f docker-compose.app.yml up
+This starts: - PostgreSQL on port `5433` - Kafka on port `9092`
 
+### 2️⃣ Run the application from the IDE
+
+Make sure the following Spring profiles are active:
+
+    local,kafka
+
+Or via command line:
+
+``` bash
 SPRING_PROFILES_ACTIVE=local,kafka ./gradlew bootRun
 ```
 
----
-## 🐳 Running with Docker Compose
+In this mode: - PostgreSQL is accessed via `localhost:5433` - Kafka is accessed via `localhost:9092`
 
-The application can be fully started locally using Docker Compose.
+------------------------------------------------------------------------
 
-### Prerequisites
-- Docker
-- Docker Compose
-- Available ports:
-  - `8081` for the application
-  - `5433` for PostgreSQL
-  - `9092` for Kafka (when using full stack)
+## 🐳 Running with Docker Compose (Staging-like Mode)
 
-### Start services
+The application can be started fully containerized, simulating a staging
+environment.
 
-```bash
-docker compose up --build
+### Start full stack
+
+``` bash
+docker compose -f docker-compose.yml -f docker-compose.app.yml up -d --build
 ```
 
-This will:
-- Start PostgreSQL on port `5433`
-- Build and start the application on port `8081`
-- Execute Flyway migrations automatically
+This will: - Start PostgreSQL - Start Kafka - Build and start the
+application - Run Flyway migrations automatically
+
+### View application logs
+
+``` bash
+docker logs -f transaction-app
+```
 
 ### Stop services
 
-```bash
+``` bash
 docker compose down
 ```
 
-Remove volumes (reset database):
+### Reset database and Kafka metadata
 
-```bash
+``` bash
 docker compose down -v
 ```
 

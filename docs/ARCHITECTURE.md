@@ -94,7 +94,7 @@ src/main/java/io/rafaalberto/transactionstreamprocessor/
   - **`resource/`**: REST entrypoints (`TransactionResource`)
   - **`controller/`**: Controllers that map request/response and delegate to use cases
   - **`request/`**, **`response/`**: Request and response DTOs
-  - **`exception/`**: Global exception handling (`AppExceptionHandler`, `ErrorResponse`)
+  - **`exception/`**: Global exception handling (`AppExceptionHandler`); `ErrorResponse` (used by it) lives in `resource/`
 - **`persistence/jpa/`**: Database implementation
   - **`TransactionEntity`**: JPA entity
   - **`JpaTransactionRepository`**: Implements `TransactionRepository`
@@ -110,7 +110,7 @@ src/main/java/io/rafaalberto/transactionstreamprocessor/
 - Infrastructure can depend on frameworks (Spring, JPA, Kafka).
 
 **Example contents (implemented):**
-- HTTP: `TransactionResource`, `CreateTransactionController`, `GetTransactionByIdController`, `AppExceptionHandler`, `CreateTransactionRequest`, `TransactionResponse`, `TransactionDetailsResponse`, `ErrorResponse`
+- HTTP: `TransactionResource`, `CreateTransactionController`, `GetTransactionByIdController`, `AppExceptionHandler` (in `exception/`), `CreateTransactionRequest`, `GetTransactionByIdRequest`, `TransactionResponse`, `TransactionDetailsResponse`, `MoneyResponse`, `ErrorResponse` (in `resource/`)
 - Persistence: `JpaTransactionRepository`, `TransactionEntity`, `TransactionEntityMapper`, `TransactionJpaRepository`
 - Messaging: `KafkaTransactionEventPublisher`, `KafkaTransactionProcessedPublisher`, `TransactionCreatedEventConsumer`, `KafkaTopics`, `KafkaConsumerConfig`
 - Config: `ApplicationUseCaseConfig`, `HttpControllerConfig`, `JpaPersistenceConfig`
