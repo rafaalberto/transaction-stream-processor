@@ -1,0 +1,18 @@
+services:
+  app:
+    build: .
+    container_name: transaction-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,kafka
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/transaction_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: transaction-kafka:29092
+    restart: unless-stopped
