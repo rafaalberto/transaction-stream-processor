@@ -175,7 +175,19 @@ This ensures that:
 4. **Consumer**
    - Builds `TransactionProcessedEvent` from the processed transaction and publishes it via `TransactionProcessedEventPublisher` (Kafka implementation).
 
-**Next (planned):** DLQ for consumer failures; Outbox pattern for atomic persist + publish on creation.
+**Next (planned):** Outbox pattern for atomic persist + publish on creation.
+
+---
+
+### DLQ Strategy
+
+The Dead Letter Queue is currently used as a safe storage mechanism for
+messages that fail after retries.
+
+Automatic reprocessing is intentionally not implemented yet, as it requires
+clear business rules and operational visibility.
+
+Future improvement: introduce controlled reprocessing mechanisms.
 
 ---
 
