@@ -12,6 +12,7 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionT
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
 import io.rafaalberto.transactionstreamprocessor.integration.config.PostgresInitializer;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -93,14 +95,18 @@ class TransactionHttpIntegrationTest {
 
     String id = JsonPath.read(responseBody, "$.id");
 
-    mockMvc
-        .perform(get("/transactions/{id}", id).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(id))
-        .andExpect(jsonPath("$.money.amount").value(DEFAULT_AMOUNT.doubleValue()))
-        .andExpect(jsonPath("$.money.currency").value(DEFAULT_CURRENCY.name()))
-        .andExpect(jsonPath("$.status").value(TransactionStatus.CREATED.name()))
-        .andExpect(jsonPath("$.occurredAt").value(DEFAULT_OCCURRED_AT.toString()));
+    Awaitility.await()
+        .atMost(Duration.ofSeconds(5))
+        .untilAsserted(
+            () ->
+                mockMvc
+                    .perform(get("/transactions/{id}", id).accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(id))
+                    .andExpect(jsonPath("$.money.amount").value(DEFAULT_AMOUNT.doubleValue()))
+                    .andExpect(jsonPath("$.money.currency").value(DEFAULT_CURRENCY.name()))
+                    .andExpect(jsonPath("$.status").value(TransactionStatus.PROCESSED.name()))
+                    .andExpect(jsonPath("$.occurredAt").value(DEFAULT_OCCURRED_AT.toString())));
   }
 
   private String createTransaction(final CreateTransactionRequest createRequest) throws Exception {
