@@ -28,7 +28,7 @@ This service is responsible for **transaction ingestion and lifecycle tracking**
 - Accepts transaction creation requests via HTTP
 - Validates input at API and domain boundaries
 - Persists transactions in PostgreSQL
-- Publishes transaction-created events to Kafka (when profile `kafka` is active)
+- Publishes transaction-created events to Kafka
 - Consumes those events and processes transactions asynchronously (CREATED → PROCESSED)
 - Publishes transaction-processed events after processing
 - Allows querying transactions by ID
@@ -170,12 +170,12 @@ This starts: - PostgreSQL on port `5433` - Kafka on port `9092`
 
 Make sure the following Spring profiles are active:
 
-    local,kafka
+    local
 
 Or via command line:
 
 ``` bash
-SPRING_PROFILES_ACTIVE=local,kafka ./gradlew bootRun
+SPRING_PROFILES_ACTIVE=local ./gradlew bootRun
 ```
 
 In this mode: - PostgreSQL is accessed via `localhost:5433` - Kafka is accessed via `localhost:9092`

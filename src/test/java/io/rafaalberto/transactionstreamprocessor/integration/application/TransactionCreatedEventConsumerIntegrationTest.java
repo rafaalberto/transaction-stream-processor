@@ -30,7 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
-@ActiveProfiles({"test", "kafka"})
+@ActiveProfiles("test")
 @ContextConfiguration(initializers = {PostgresInitializer.class, KafkaInitializer.class})
 class TransactionCreatedEventConsumerIntegrationTest {
 
