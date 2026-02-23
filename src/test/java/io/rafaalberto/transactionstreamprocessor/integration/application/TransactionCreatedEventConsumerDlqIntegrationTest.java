@@ -31,7 +31,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @SpringBootTest
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {PostgresInitializer.class, KafkaInitializer.class})
-class TransactionCreatedEventDlqIntegrationTest {
+class TransactionCreatedEventConsumerDlqIntegrationTest {
 
   @Autowired private ConsumerFactory<String, TransactionCreatedEvent> consumerFactory;
 
@@ -63,9 +63,9 @@ class TransactionCreatedEventDlqIntegrationTest {
     kafkaTemplate.send(KafkaTopics.TRANSACTIONS_CREATED, event);
 
     var consumer = consumerFactory.createConsumer("dlq-test-group", UUID.randomUUID().toString());
-    consumer.subscribe(List.of(KafkaTopics.TRANSACTIONS_DLQ));
 
-    try {
+    try (consumer) {
+      consumer.subscribe(List.of(KafkaTopics.TRANSACTIONS_DLQ));
       Awaitility.await()
           .atMost(Duration.ofSeconds(10))
           .untilAsserted(
@@ -81,8 +81,6 @@ class TransactionCreatedEventDlqIntegrationTest {
 
                 verify(processTransactionUseCase, atLeastOnce()).execute(any());
               });
-    } finally {
-      consumer.close();
     }
   }
 }

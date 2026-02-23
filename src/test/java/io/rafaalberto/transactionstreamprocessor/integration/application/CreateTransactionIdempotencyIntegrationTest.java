@@ -57,13 +57,15 @@ class CreateTransactionIdempotencyIntegrationTest {
     assertThat(secondTransaction.id()).isEqualTo(firstTransaction.id());
 
     var all = transactionRepository.findByExternalReference(externalReference);
+
     assertThat(all.stream().count()).isEqualTo(1);
+
     verify(transactionEventPublisher, atLeastOnce()).publish(any());
   }
 
   @Test
   void shouldBeIdempotentUnderConcurrentRequests() throws Exception {
-    var externalReference = "account-service::456";
+    var externalReference = "account-service::123";
     var command =
         new CreateTransactionCommand(
             new BigDecimal("100"),
