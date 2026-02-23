@@ -16,7 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
-@ActiveProfiles({"test", "kafka"})
+@ActiveProfiles("test")
 @ContextConfiguration(initializers = {PostgresInitializer.class, KafkaInitializer.class})
 class TransactionCreatedEventKafkaIntegrationTest {
 

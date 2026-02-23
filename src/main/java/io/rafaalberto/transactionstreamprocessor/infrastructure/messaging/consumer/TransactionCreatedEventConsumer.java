@@ -8,12 +8,10 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionI
 import io.rafaalberto.transactionstreamprocessor.infrastructure.config.KafkaTopics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("kafka")
 public class TransactionCreatedEventConsumer {
 
   private static final Logger LOGGER =

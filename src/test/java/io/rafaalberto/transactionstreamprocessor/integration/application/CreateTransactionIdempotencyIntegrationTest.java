@@ -1,7 +1,11 @@
 package io.rafaalberto.transactionstreamprocessor.integration.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 
+import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionEventPublisher;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionCommand;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
@@ -21,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
@@ -32,6 +37,8 @@ class CreateTransactionIdempotencyIntegrationTest {
   @Autowired private CreateTransactionUseCase createTransactionUseCase;
 
   @Autowired private TransactionRepository transactionRepository;
+
+  @MockitoBean private TransactionEventPublisher transactionEventPublisher;
 
   @Test
   void shouldBeIdempotentWhenUsingSameExternalReference() {
@@ -50,7 +57,10 @@ class CreateTransactionIdempotencyIntegrationTest {
     assertThat(secondTransaction.id()).isEqualTo(firstTransaction.id());
 
     var all = transactionRepository.findByExternalReference(externalReference);
+
     assertThat(all.stream().count()).isEqualTo(1);
+
+    verify(transactionEventPublisher, atLeastOnce()).publish(any());
   }
 
   @Test

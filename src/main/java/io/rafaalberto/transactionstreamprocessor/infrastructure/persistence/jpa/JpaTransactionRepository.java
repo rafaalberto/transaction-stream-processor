@@ -1,10 +1,12 @@
 package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa;
 
+import io.rafaalberto.transactionstreamprocessor.application.exception.DuplicateTransactionException;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionID;
 import java.util.Objects;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -23,8 +25,12 @@ public class JpaTransactionRepository implements TransactionRepository {
   public Transaction save(final Transaction transaction) {
     Objects.requireNonNull(transaction);
     var entity = mapper.toEntity(transaction);
-    var persisted = jpaRepository.save(entity);
-    return mapper.toDomain(persisted);
+    try {
+      var persisted = jpaRepository.save(entity);
+      return mapper.toDomain(persisted);
+    } catch (DataIntegrityViolationException ex) {
+      throw new DuplicateTransactionException();
+    }
   }
 
   @Override

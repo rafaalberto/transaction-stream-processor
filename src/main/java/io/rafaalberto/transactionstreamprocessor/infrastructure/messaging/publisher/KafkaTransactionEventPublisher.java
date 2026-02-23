@@ -5,12 +5,10 @@ import io.rafaalberto.transactionstreamprocessor.application.publisher.Transacti
 import io.rafaalberto.transactionstreamprocessor.infrastructure.config.KafkaTopics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("kafka")
 public class KafkaTransactionEventPublisher implements TransactionEventPublisher {
 
   private static final Logger LOGGER =
