@@ -168,14 +168,14 @@ This starts: - PostgreSQL on port `5433` - Kafka on port `9092`
 
 ### 2️⃣ Run the application from the IDE
 
-Make sure the following Spring profiles are active:
+Make sure the following Spring profile is active:
 
-    local,kafka
+    local
 
 Or via command line:
 
 ``` bash
-SPRING_PROFILES_ACTIVE=local,kafka ./gradlew bootRun
+SPRING_PROFILES_ACTIVE=local ./gradlew bootRun
 ```
 
 In this mode: - PostgreSQL is accessed via `localhost:5433` - Kafka is accessed via `localhost:9092`
