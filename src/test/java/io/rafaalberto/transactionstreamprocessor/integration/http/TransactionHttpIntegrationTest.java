@@ -1,11 +1,15 @@
 package io.rafaalberto.transactionstreamprocessor.integration.http;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionEventPublisher;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
@@ -13,6 +17,7 @@ import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.Cre
 import io.rafaalberto.transactionstreamprocessor.integration.config.PostgresInitializer;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +25,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
@@ -33,21 +39,19 @@ class TransactionHttpIntegrationTest {
 
   @Autowired private ObjectMapper objectMapper;
 
+  @MockitoBean private TransactionEventPublisher transactionEventPublisher;
+
   private static final BigDecimal DEFAULT_AMOUNT = BigDecimal.valueOf(100);
   private static final Currency DEFAULT_CURRENCY = Currency.BRL;
   private static final TransactionType DEFAULT_TYPE = TransactionType.CREDIT;
-  private static final String DEFAULT_EXTERNAL_REFERENCE = "account-service::account-123";
   private static final Instant DEFAULT_OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
 
   @Test
   void shouldCreateTransaction() throws Exception {
+    var externalReference = "account-service-" + UUID.randomUUID();
     var request =
         new CreateTransactionRequest(
-            DEFAULT_AMOUNT,
-            DEFAULT_CURRENCY,
-            DEFAULT_TYPE,
-            DEFAULT_OCCURRED_AT,
-            DEFAULT_EXTERNAL_REFERENCE);
+            DEFAULT_AMOUNT, DEFAULT_CURRENCY, DEFAULT_TYPE, DEFAULT_OCCURRED_AT, externalReference);
 
     mockMvc
         .perform(
@@ -59,17 +63,20 @@ class TransactionHttpIntegrationTest {
         .andExpect(jsonPath("$.money.amount").value(DEFAULT_AMOUNT.doubleValue()))
         .andExpect(jsonPath("$.money.currency").value(DEFAULT_CURRENCY.name()))
         .andExpect(jsonPath("$.occurredAt").value(DEFAULT_OCCURRED_AT.toString()));
+
+    verify(transactionEventPublisher, atLeastOnce()).publish(any());
   }
 
   @Test
   void shouldReturnBadRequestWhenAmountIsZero() throws Exception {
+    var externalReference = "account-service-" + UUID.randomUUID();
     var request =
         new CreateTransactionRequest(
             BigDecimal.valueOf(0),
             DEFAULT_CURRENCY,
             DEFAULT_TYPE,
             DEFAULT_OCCURRED_AT,
-            DEFAULT_EXTERNAL_REFERENCE);
+            externalReference);
 
     mockMvc
         .perform(
@@ -81,13 +88,10 @@ class TransactionHttpIntegrationTest {
 
   @Test
   void shouldReturnTransactionStatusById() throws Exception {
+    var externalReference = "account-service-" + UUID.randomUUID();
     var createRequest =
         new CreateTransactionRequest(
-            DEFAULT_AMOUNT,
-            DEFAULT_CURRENCY,
-            DEFAULT_TYPE,
-            DEFAULT_OCCURRED_AT,
-            DEFAULT_EXTERNAL_REFERENCE);
+            DEFAULT_AMOUNT, DEFAULT_CURRENCY, DEFAULT_TYPE, DEFAULT_OCCURRED_AT, externalReference);
 
     var responseBody = createTransaction(createRequest);
 
@@ -101,6 +105,8 @@ class TransactionHttpIntegrationTest {
         .andExpect(jsonPath("$.money.currency").value(DEFAULT_CURRENCY.name()))
         .andExpect(jsonPath("$.status").value(TransactionStatus.CREATED.name()))
         .andExpect(jsonPath("$.occurredAt").value(DEFAULT_OCCURRED_AT.toString()));
+
+    verify(transactionEventPublisher, atLeastOnce()).publish(any());
   }
 
   private String createTransaction(final CreateTransactionRequest createRequest) throws Exception {
