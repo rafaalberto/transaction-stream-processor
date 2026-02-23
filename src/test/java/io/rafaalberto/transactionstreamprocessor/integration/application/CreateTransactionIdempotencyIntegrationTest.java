@@ -15,6 +15,11 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionT
 import io.rafaalberto.transactionstreamprocessor.integration.config.PostgresInitializer;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,46 +61,46 @@ class CreateTransactionIdempotencyIntegrationTest {
     verify(transactionEventPublisher, atLeastOnce()).publish(any());
   }
 
-  //  @Test
-  //  void shouldBeIdempotentUnderConcurrentRequests() throws Exception {
-  //    var externalReference = "account-service::456";
-  //    var command =
-  //        new CreateTransactionCommand(
-  //            new BigDecimal("100"),
-  //            Currency.BRL,
-  //            TransactionType.CREDIT,
-  //            Instant.now(),
-  //            externalReference);
-  //
-  //    try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
-  //
-  //      CountDownLatch ready = new CountDownLatch(2);
-  //      CountDownLatch start = new CountDownLatch(1);
-  //
-  //      Callable<Transaction> task =
-  //          () -> {
-  //            ready.countDown();
-  //            start.await();
-  //            return createTransactionUseCase.execute(command);
-  //          };
-  //
-  //      Future<Transaction> future1 = executor.submit(task);
-  //      Future<Transaction> future2 = executor.submit(task);
-  //
-  //      ready.await();
-  //
-  //      start.countDown();
-  //
-  //      Transaction transaction1 = future1.get();
-  //      Transaction transaction2 = future2.get();
-  //
-  //      assertThat(transaction1.id()).isEqualTo(transaction2.id());
-  //
-  //      var persisted = transactionRepository.findByExternalReference(externalReference);
-  //
-  //      assertThat(persisted.stream().count()).isEqualTo(1);
-  //
-  //      executor.shutdown();
-  //    }
-  //  }
+  @Test
+  void shouldBeIdempotentUnderConcurrentRequests() throws Exception {
+    var externalReference = "account-service::456";
+    var command =
+        new CreateTransactionCommand(
+            new BigDecimal("100"),
+            Currency.BRL,
+            TransactionType.CREDIT,
+            Instant.now(),
+            externalReference);
+
+    try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
+
+      CountDownLatch ready = new CountDownLatch(2);
+      CountDownLatch start = new CountDownLatch(1);
+
+      Callable<Transaction> task =
+          () -> {
+            ready.countDown();
+            start.await();
+            return createTransactionUseCase.execute(command);
+          };
+
+      Future<Transaction> future1 = executor.submit(task);
+      Future<Transaction> future2 = executor.submit(task);
+
+      ready.await();
+
+      start.countDown();
+
+      Transaction transaction1 = future1.get();
+      Transaction transaction2 = future2.get();
+
+      assertThat(transaction1.id()).isEqualTo(transaction2.id());
+
+      var persisted = transactionRepository.findByExternalReference(externalReference);
+
+      assertThat(persisted.stream().count()).isEqualTo(1);
+
+      executor.shutdown();
+    }
+  }
 }

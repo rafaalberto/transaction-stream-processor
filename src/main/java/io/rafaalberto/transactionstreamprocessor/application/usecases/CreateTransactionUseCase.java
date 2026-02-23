@@ -1,6 +1,7 @@
 package io.rafaalberto.transactionstreamprocessor.application.usecases;
 
 import io.rafaalberto.transactionstreamprocessor.application.events.TransactionCreatedEvent;
+import io.rafaalberto.transactionstreamprocessor.application.exception.DuplicateTransactionException;
 import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionEventPublisher;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
@@ -19,14 +20,15 @@ public final class CreateTransactionUseCase {
   }
 
   public Transaction execute(final CreateTransactionCommand command) {
-    return transactionRepository
-        .findByExternalReference(command.externalReference())
-        .orElseGet(
-            () -> {
-              var transactionPersisted = createTransaction(command);
-              publishTransaction(transactionPersisted);
-              return transactionPersisted;
-            });
+    try {
+      var transaction = createTransaction(command);
+      publishTransaction(transaction);
+      return transaction;
+    } catch (DuplicateTransactionException ex) {
+      return transactionRepository
+          .findByExternalReference(command.externalReference())
+          .orElseThrow();
+    }
   }
 
   private Transaction createTransaction(final CreateTransactionCommand command) {
