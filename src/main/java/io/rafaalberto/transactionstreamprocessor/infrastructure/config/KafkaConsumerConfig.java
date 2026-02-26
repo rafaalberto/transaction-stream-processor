@@ -1,6 +1,8 @@
 package io.rafaalberto.transactionstreamprocessor.infrastructure.config;
 
 import io.rafaalberto.transactionstreamprocessor.application.events.TransactionCreatedEvent;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.InvalidTransactionException;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.TransactionNotFoundException;
 import java.nio.charset.StandardCharsets;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
@@ -45,7 +47,10 @@ public class KafkaConsumerConfig {
     var handler = new DefaultErrorHandler(recoverer, backOff);
 
     handler.addNotRetryableExceptions(
-        IllegalArgumentException.class, DeserializationException.class);
+        IllegalArgumentException.class,
+        DeserializationException.class,
+        InvalidTransactionException.class,
+        TransactionNotFoundException.class);
 
     return handler;
   }

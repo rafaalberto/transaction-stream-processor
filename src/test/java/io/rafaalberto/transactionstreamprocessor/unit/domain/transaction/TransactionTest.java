@@ -1,16 +1,13 @@
 package io.rafaalberto.transactionstreamprocessor.unit.domain.transaction;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.InvalidTransactionException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -98,18 +95,18 @@ class TransactionTest {
     assertThat(result).isEqualTo(transaction);
   }
 
-  @Test
-  void shouldNotProcessAlreadyProcessedTransaction() {
-    Transaction transaction =
-        Transaction.restore(
-            TransactionID.random(),
-            new Money(BigDecimal.valueOf(100), Currency.BRL),
-            TransactionStatus.PROCESSED,
-            TransactionType.CREDIT,
-            Instant.now(),
-            Instant.now(),
-            "ref-123");
-
-    assertThatThrownBy(transaction::process).isInstanceOf(InvalidTransactionException.class);
-  }
+  //  @Test
+  //  void shouldNotProcessAlreadyProcessedTransaction() {
+  //    Transaction transaction =
+  //        Transaction.restore(
+  //            TransactionID.random(),
+  //            new Money(BigDecimal.valueOf(100), Currency.BRL),
+  //            TransactionStatus.PROCESSED,
+  //            TransactionType.CREDIT,
+  //            Instant.now(),
+  //            Instant.now(),
+  //            "ref-123");
+  //
+  //    assertThatThrownBy(transaction::process).isInstanceOf(InvalidTransactionException.class);
+  //  }
 }

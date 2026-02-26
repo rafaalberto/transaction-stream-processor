@@ -43,7 +43,7 @@ class ProcessTransactionUseCaseTest {
     when(repository.findById(transaction.id())).thenReturn(Optional.of(transaction));
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-    var result = useCase.execute(transaction.id());
+    var result = useCase.execute(transaction.id()).orElseThrow();
 
     assertThat(result.id()).isEqualTo(transaction.id());
     assertThat(result.status()).isEqualTo(TransactionStatus.PROCESSED);

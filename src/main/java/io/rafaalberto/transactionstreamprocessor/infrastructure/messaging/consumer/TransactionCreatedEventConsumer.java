@@ -31,10 +31,15 @@ public class TransactionCreatedEventConsumer {
   public void consume(final TransactionCreatedEvent event) {
     LOGGER.info("TransactionCreatedEventConsumer consumed transactionId={}", event.transactionId());
     var transactionId = new TransactionID(event.transactionId());
-    var processedTransaction = processTransactionUseCase.execute(transactionId);
-    var transactionProcessedEvent = TransactionProcessedEvent.from(processedTransaction);
-    transactionProcessedPublisher.publish(transactionProcessedEvent);
-    LOGGER.info(
-        "TransactionProcessedEvent published transactionId={}", processedTransaction.id().value());
+    processTransactionUseCase
+        .execute(transactionId)
+        .ifPresent(
+            processedTransaction -> {
+              var transactionProcessedEvent = TransactionProcessedEvent.from(processedTransaction);
+              transactionProcessedPublisher.publish(transactionProcessedEvent);
+              LOGGER.info(
+                  "TransactionProcessedEvent published transactionId={}",
+                  processedTransaction.id().value());
+            });
   }
 }

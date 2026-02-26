@@ -62,9 +62,8 @@ public final class Transaction {
   }
 
   public Transaction process() {
-    if (this.status != TransactionStatus.CREATED) {
-      throw new InvalidTransactionException(
-          "Only CREATED transactions can be processed. Current status: " + status);
+    if (this.status == TransactionStatus.PROCESSED) {
+      return this;
     }
     return new Transaction(
         this.id,
