@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.StreamSupport;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,6 @@ class TransactionCreatedEventConsumerDlqIntegrationTest {
 
   @Test
   void shouldSendEventToDlqWhenProcessingFails() {
-
     doThrow(new RuntimeException("forced dlq failure"))
         .when(processTransactionUseCase)
         .execute(any());
@@ -74,13 +74,16 @@ class TransactionCreatedEventConsumerDlqIntegrationTest {
 
                 assertThat(records.count()).isGreaterThan(0);
 
-                var record = records.iterator().next();
+                var consumerRecord =
+                    StreamSupport.stream(records.spliterator(), false)
+                        .filter(r -> transactionId.equals(r.value().transactionId()))
+                        .findFirst()
+                        .orElseThrow();
 
-                assertThat(record.value().transactionId()).isEqualTo(transactionId);
-                assertThat(record.headers().lastHeader("kafka_dlt-exception-fqcn")).isNotNull();
-
-                verify(processTransactionUseCase, atLeastOnce()).execute(any());
+                assertThat(consumerRecord.value().transactionId()).isEqualTo(transactionId);
+                assertThat(consumerRecord.headers().lastHeader("x-exception-class")).isNotNull();
               });
+      verify(processTransactionUseCase, atLeastOnce()).execute(any());
     }
   }
 }

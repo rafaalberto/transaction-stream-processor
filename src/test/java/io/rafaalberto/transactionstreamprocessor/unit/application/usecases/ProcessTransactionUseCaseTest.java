@@ -66,6 +66,7 @@ class ProcessTransactionUseCaseTest {
         .isInstanceOf(TransactionNotFoundException.class);
 
     verify(repository).findById(transactionId);
+    verify(repository, never()).save(any());
   }
 
   @Test
