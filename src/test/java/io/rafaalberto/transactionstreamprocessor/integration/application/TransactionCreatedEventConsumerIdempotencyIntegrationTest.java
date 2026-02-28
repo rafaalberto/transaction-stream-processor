@@ -32,7 +32,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @SpringBootTest
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {PostgresInitializer.class, KafkaInitializer.class})
-class TransactionCreatedEventConsumerIntegrationTest {
+class TransactionCreatedEventConsumerIdempotencyIntegrationTest {
 
   @Autowired private KafkaTemplate<String, TransactionCreatedEvent> kafkaTemplate;
 
@@ -43,7 +43,7 @@ class TransactionCreatedEventConsumerIntegrationTest {
   private static final Instant OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
 
   @Test
-  void shouldConsumeEventAndProcessTransaction() {
+  void shouldConsumeEventAndProcessTransactionIdempotently() {
     var money = new Money(BigDecimal.valueOf(100), Currency.BRL);
     var externalReference = "kafka-test-" + UUID.randomUUID();
     var transaction =
@@ -71,6 +71,21 @@ class TransactionCreatedEventConsumerIntegrationTest {
                   transactionRepository.findById(transaction.id()).orElseThrow();
 
               assertThat(processed.status()).isEqualTo(TransactionStatus.PROCESSED);
+            });
+
+    verify(transactionProcessedPublisher, times(1))
+        .publish(argThat(event -> event.transactionId().equals(transaction.id().value())));
+
+    kafkaTemplate.send(KafkaTopics.TRANSACTIONS_CREATED, transactionEvent);
+
+    Awaitility.await()
+        .atMost(Duration.ofSeconds(5))
+        .untilAsserted(
+            () -> {
+              Transaction stillProcessed =
+                  transactionRepository.findById(transaction.id()).orElseThrow();
+
+              assertThat(stillProcessed.status()).isEqualTo(TransactionStatus.PROCESSED);
             });
 
     verify(transactionProcessedPublisher, times(1))

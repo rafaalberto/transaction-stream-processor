@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 class ProcessTransactionUseCaseTest {
 
   private static final Instant OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
+  private static final Instant CREATED_AT = Instant.parse("2025-03-23T15:00:00Z");
 
   @Test
   void shouldProcessTransactionSuccessfully() {
@@ -43,7 +45,7 @@ class ProcessTransactionUseCaseTest {
     when(repository.findById(transaction.id())).thenReturn(Optional.of(transaction));
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-    var result = useCase.execute(transaction.id());
+    var result = useCase.execute(transaction.id()).orElseThrow();
 
     assertThat(result.id()).isEqualTo(transaction.id());
     assertThat(result.status()).isEqualTo(TransactionStatus.PROCESSED);
@@ -64,5 +66,34 @@ class ProcessTransactionUseCaseTest {
         .isInstanceOf(TransactionNotFoundException.class);
 
     verify(repository).findById(transactionId);
+    verify(repository, never()).save(any());
+  }
+
+  @Test
+  void shouldNotProcessTransactionWhenIsAlreadyProcessed() {
+    var transactionId = TransactionID.random();
+    var amount = BigDecimal.valueOf(100);
+    var currency = Currency.BRL;
+    var money = new Money(amount, currency);
+    var status = TransactionStatus.PROCESSED;
+    var type = TransactionType.CREDIT;
+    var externalReference = "account-service::account-123";
+
+    var transaction =
+        Transaction.restore(
+            transactionId, money, status, type, OCCURRED_AT, CREATED_AT, externalReference);
+
+    var repository = mock(TransactionRepository.class);
+
+    var useCase = new ProcessTransactionUseCase(repository);
+
+    when(repository.findById(transactionId)).thenReturn(Optional.of(transaction));
+
+    var result = useCase.execute(transactionId);
+
+    assertThat(result).isNotPresent();
+
+    verify(repository).findById(transactionId);
+    verify(repository, never()).save(any());
   }
 }
