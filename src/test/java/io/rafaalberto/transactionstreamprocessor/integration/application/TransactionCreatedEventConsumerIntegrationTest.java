@@ -2,7 +2,7 @@ package io.rafaalberto.transactionstreamprocessor.integration.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.rafaalberto.transactionstreamprocessor.application.events.TransactionCreatedEvent;
@@ -73,7 +73,7 @@ class TransactionCreatedEventConsumerIntegrationTest {
               assertThat(processed.status()).isEqualTo(TransactionStatus.PROCESSED);
             });
 
-    verify(transactionProcessedPublisher, atLeastOnce())
+    verify(transactionProcessedPublisher, times(1))
         .publish(argThat(event -> event.transactionId().equals(transaction.id().value())));
   }
 }

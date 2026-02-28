@@ -78,11 +78,15 @@ class TransactionCreatedEventConsumerIdempotencyIntegrationTest {
 
     kafkaTemplate.send(KafkaTopics.TRANSACTIONS_CREATED, transactionEvent);
 
-    Awaitility.await().atMost(Duration.ofSeconds(5)).until(() -> true);
+    Awaitility.await()
+        .atMost(Duration.ofSeconds(5))
+        .untilAsserted(
+            () -> {
+              Transaction stillProcessed =
+                  transactionRepository.findById(transaction.id()).orElseThrow();
 
-    Transaction stillProcessed = transactionRepository.findById(transaction.id()).orElseThrow();
-
-    assertThat(stillProcessed.status()).isEqualTo(TransactionStatus.PROCESSED);
+              assertThat(stillProcessed.status()).isEqualTo(TransactionStatus.PROCESSED);
+            });
 
     verify(transactionProcessedPublisher, times(1))
         .publish(argThat(event -> event.transactionId().equals(transaction.id().value())));
