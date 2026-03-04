@@ -1,6 +1,7 @@
 package io.rafaalberto.transactionstreamprocessor.unit.application.usecases;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -97,6 +98,32 @@ class CreateTransactionUseCaseTest {
     assertThat(result.createdAt()).isAfterOrEqualTo(result.occurredAt());
     assertThat(result.status()).isEqualTo(TransactionStatus.CREATED);
     assertThat(result.externalReference()).isEqualTo(externalReference);
+
+    verify(repository).save(argThat(tx -> tx.status() == TransactionStatus.CREATED));
+    verify(repository).findByExternalReference(externalReference);
+    verify(publisher, never()).publish(any());
+  }
+
+  @Test
+  void shouldThrowIllegalStateWhenDuplicateButNotFound() {
+    var amount = BigDecimal.valueOf(100);
+    var currency = Currency.BRL;
+    var type = TransactionType.CREDIT;
+    var externalReference = "account-service::account-123";
+
+    var command =
+        new CreateTransactionCommand(amount, currency, type, OCCURRED_AT, externalReference);
+
+    var repository = mock(TransactionRepository.class);
+    var publisher = mock(TransactionEventPublisher.class);
+
+    var useCase = new CreateTransactionUseCase(repository, publisher);
+    when(repository.save(any())).thenThrow(new DuplicateTransactionException());
+    when(repository.findByExternalReference(externalReference)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> useCase.execute(command))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessage("Duplicate reported but transaction not found");
 
     verify(repository).save(argThat(tx -> tx.status() == TransactionStatus.CREATED));
     verify(repository).findByExternalReference(externalReference);
