@@ -179,6 +179,31 @@ class TransactionResourceTest {
   }
 
   @Test
+  void shouldReturnConflictWhenDuplicateReportedButTransactionNotFound() throws Exception {
+    var amount = BigDecimal.valueOf(100);
+    var currency = Currency.BRL;
+    var type = TransactionType.CREDIT;
+    var externalReference = "account-service::account-123";
+
+    var request =
+        new CreateTransactionRequest(amount, currency, type, OCCURRED_AT, externalReference);
+
+    when(createTransactionController.create(any()))
+        .thenThrow(new IllegalStateException("Duplicate reported but transaction not found"));
+    mockMvc
+        .perform(
+            post("/transactions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.message").value("Invalid state"))
+        .andExpect(jsonPath("$.details[0]").value("Duplicate reported but transaction not found"));
+
+    verify(createTransactionController).create(any());
+    verifyNoMoreInteractions(createTransactionController);
+  }
+
+  @Test
   void shouldGetTransactionByIdSuccessfully() throws Exception {
     var transactionId = TransactionID.random();
     var amount = BigDecimal.valueOf(100);

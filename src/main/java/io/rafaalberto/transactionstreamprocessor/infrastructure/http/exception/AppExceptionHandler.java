@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -110,5 +111,12 @@ public class AppExceptionHandler {
         .body(
             new ErrorResponse(
                 "Invalid transaction", List.of(exception.getMessage()), Instant.now()));
+  }
+
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<ErrorResponse> handleIllegalState(final IllegalStateException exception) {
+
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse("Invalid state", List.of(exception.getMessage()), Instant.now()));
   }
 }

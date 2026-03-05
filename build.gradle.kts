@@ -23,6 +23,7 @@ repositories {
 }
 
 val testcontainersVersion = "1.19.8"
+val awaitilityVersion = "4.2.0"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -40,6 +41,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
     testImplementation("org.testcontainers:kafka:$testcontainersVersion")
+    testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 }

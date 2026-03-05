@@ -27,7 +27,8 @@ public final class CreateTransactionUseCase {
     } catch (DuplicateTransactionException ex) {
       return transactionRepository
           .findByExternalReference(command.externalReference())
-          .orElseThrow();
+          .orElseThrow(
+              () -> new IllegalStateException("Duplicate reported but transaction not found"));
     }
   }
 

@@ -103,6 +103,10 @@ src/main/java/io/rafaalberto/transactionstreamprocessor/
   - **`publisher/`**: `KafkaTransactionEventPublisher`, `KafkaTransactionProcessedPublisher`, `LogTransactionEventPublisher` (profile-based)
   - **`consumer/`**: `TransactionCreatedEventConsumer` (consumes events, runs `ProcessTransactionUseCase`, publishes processed event)
 
+**Why Resource + Controller**
+- REST mapping and status codes in Resource.
+- Use case invocation and DTO mapping in Controller for clearer separation and testability.
+
 **Key Principles:**
 - HTTP, persistence, and messaging are all implemented.
 - REST resources and controllers are thin and delegate to use cases.

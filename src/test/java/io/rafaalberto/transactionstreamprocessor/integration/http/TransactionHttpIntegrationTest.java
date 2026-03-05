@@ -68,6 +68,17 @@ class TransactionHttpIntegrationTest {
   }
 
   @Test
+  void shouldReturnNotFoundWhenTransactionDoesNotExist() throws Exception {
+    var transactionId = UUID.randomUUID().toString();
+    mockMvc
+        .perform(get("/transactions/{id}", transactionId).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.message").value("Transaction not found"))
+        .andExpect(
+            jsonPath("$.details[0]").value("Transaction not found for ID: " + transactionId));
+  }
+
+  @Test
   void shouldReturnBadRequestWhenAmountIsZero() throws Exception {
     var externalReference = "account-service-" + UUID.randomUUID();
     var request =
