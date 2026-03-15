@@ -1,5 +1,6 @@
 package io.rafaalberto.transactionstreamprocessor.infrastructure.http.exception;
 
+import io.rafaalberto.transactionstreamprocessor.application.exception.DuplicateTransactionException;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.InvalidTransactionException;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.TransactionNotFoundException;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.resource.ErrorResponse;
@@ -118,5 +119,14 @@ public class AppExceptionHandler {
 
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(new ErrorResponse("Invalid state", List.of(exception.getMessage()), Instant.now()));
+  }
+
+  @ExceptionHandler(DuplicateTransactionException.class)
+  public ResponseEntity<ErrorResponse> handleDuplicateTransaction(
+      final DuplicateTransactionException exception) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(
+            new ErrorResponse(
+                "Transaction already exists", List.of(exception.getMessage()), Instant.now()));
   }
 }
