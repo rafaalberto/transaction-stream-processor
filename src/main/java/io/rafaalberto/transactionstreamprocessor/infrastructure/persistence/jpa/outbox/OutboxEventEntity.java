@@ -8,6 +8,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "outbox_events")
@@ -20,6 +22,7 @@ public class OutboxEventEntity {
   @Column(name = "topic", length = 255, nullable = false)
   private String topic;
 
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb", nullable = false)
   private String payload;
 
@@ -45,7 +48,7 @@ public class OutboxEventEntity {
     this.createdAt = createdAt;
   }
 
-  void markAsSent() {
+  public void markAsSent() {
     this.status = OutboxEventStatus.SENT;
   }
 

@@ -1,12 +1,13 @@
 package io.rafaalberto.transactionstreamprocessor.infrastructure.config;
 
-import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionEventPublisher;
+import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEventAppender;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.GetTransactionByIdUseCase;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.ProcessTransactionUseCase;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.CreateTransactionController;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.GetTransactionByIdController;
+import io.rafaalberto.transactionstreamprocessor.infrastructure.service.CreateTransactionService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,8 +17,8 @@ public class UseCaseConfig {
   @Bean
   CreateTransactionUseCase createTransactionUseCase(
       final TransactionRepository transactionRepository,
-      final TransactionEventPublisher transactionPublisher) {
-    return new CreateTransactionUseCase(transactionRepository, transactionPublisher);
+      final OutboxEventAppender outboxEventAppender) {
+    return new CreateTransactionUseCase(transactionRepository, outboxEventAppender);
   }
 
   @Bean
@@ -28,8 +29,8 @@ public class UseCaseConfig {
 
   @Bean
   CreateTransactionController createTransactionController(
-      final CreateTransactionUseCase createTransactionUseCase) {
-    return new CreateTransactionController(createTransactionUseCase);
+      final CreateTransactionService createTransactionService) {
+    return new CreateTransactionController(createTransactionService);
   }
 
   @Bean

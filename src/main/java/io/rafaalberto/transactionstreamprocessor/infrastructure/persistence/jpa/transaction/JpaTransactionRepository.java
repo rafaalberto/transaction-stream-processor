@@ -26,7 +26,7 @@ public class JpaTransactionRepository implements TransactionRepository {
     Objects.requireNonNull(transaction);
     var entity = mapper.toEntity(transaction);
     try {
-      var persisted = jpaRepository.save(entity);
+      var persisted = jpaRepository.saveAndFlush(entity);
       return mapper.toDomain(persisted);
     } catch (DataIntegrityViolationException ex) {
       throw new DuplicateTransactionException();

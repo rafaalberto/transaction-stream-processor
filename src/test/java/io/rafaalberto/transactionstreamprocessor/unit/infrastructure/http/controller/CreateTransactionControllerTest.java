@@ -7,13 +7,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.CreateTransactionController;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
+import io.rafaalberto.transactionstreamprocessor.infrastructure.service.CreateTransactionService;
 import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -24,8 +24,8 @@ class CreateTransactionControllerTest {
 
   @Test
   void shouldCallUseCaseAndReturnTransactionResponse() {
-    var useCase = mock(CreateTransactionUseCase.class);
-    var controller = new CreateTransactionController(useCase);
+    var service = mock(CreateTransactionService.class);
+    var controller = new CreateTransactionController(service);
 
     var amount = BigDecimal.valueOf(100);
     var currency = Currency.BRL;
@@ -37,7 +37,7 @@ class CreateTransactionControllerTest {
     var transaction =
         Transaction.create(new Money(amount, currency), type, OCCURRED_AT, externalReference);
 
-    when(useCase.execute(any())).thenReturn(transaction);
+    when(service.execute(any())).thenReturn(transaction);
 
     var response = controller.create(createTransactionRequest);
 
@@ -48,7 +48,7 @@ class CreateTransactionControllerTest {
     assertThat(response.occurredAt()).isEqualTo(OCCURRED_AT);
     assertThat(response.createdAt()).isAfterOrEqualTo(transaction.occurredAt());
 
-    verify(useCase).execute(any());
-    verifyNoMoreInteractions(useCase);
+    verify(service).execute(any());
+    verifyNoMoreInteractions(service);
   }
 }

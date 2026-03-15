@@ -1,8 +1,8 @@
 package io.rafaalberto.transactionstreamprocessor.application.usecases;
 
 import io.rafaalberto.transactionstreamprocessor.application.events.TransactionCreatedEvent;
-import io.rafaalberto.transactionstreamprocessor.application.exception.DuplicateTransactionException;
-import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionEventPublisher;
+import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEvent;
+import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEventAppender;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
@@ -10,26 +10,24 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
 public final class CreateTransactionUseCase {
 
   private final TransactionRepository transactionRepository;
-  private final TransactionEventPublisher transactionEventPublisher;
+  private final OutboxEventAppender outboxEventAppender;
 
   public CreateTransactionUseCase(
       final TransactionRepository transactionRepository,
-      final TransactionEventPublisher transactionPublisher) {
+      final OutboxEventAppender outboxEventAppender) {
     this.transactionRepository = transactionRepository;
-    this.transactionEventPublisher = transactionPublisher;
+    this.outboxEventAppender = outboxEventAppender;
   }
 
   public Transaction execute(final CreateTransactionCommand command) {
-    try {
-      var transaction = createTransaction(command);
-      publishTransaction(transaction);
-      return transaction;
-    } catch (DuplicateTransactionException ex) {
-      return transactionRepository
-          .findByExternalReference(command.externalReference())
-          .orElseThrow(
-              () -> new IllegalStateException("Duplicate reported but transaction not found"));
+    var existingTransaction =
+        transactionRepository.findByExternalReference(command.externalReference());
+    if (existingTransaction.isPresent()) {
+      return existingTransaction.get();
     }
+    var transaction = createTransaction(command);
+    appendOutboxEvent(transaction);
+    return transaction;
   }
 
   private Transaction createTransaction(final CreateTransactionCommand command) {
@@ -42,7 +40,7 @@ public final class CreateTransactionUseCase {
     return transactionRepository.save(transaction);
   }
 
-  private void publishTransaction(final Transaction transaction) {
+  private void appendOutboxEvent(final Transaction transaction) {
     var transactionEvent =
         new TransactionCreatedEvent(
             transaction.id().value(),
@@ -52,6 +50,6 @@ public final class CreateTransactionUseCase {
             transaction.occurredAt(),
             transaction.createdAt(),
             transaction.externalReference());
-    transactionEventPublisher.publish(transactionEvent);
+    outboxEventAppender.append(new OutboxEvent("transactions.created", transactionEvent));
   }
 }

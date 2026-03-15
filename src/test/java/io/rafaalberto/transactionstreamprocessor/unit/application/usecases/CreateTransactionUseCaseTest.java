@@ -1,7 +1,6 @@
 package io.rafaalberto.transactionstreamprocessor.unit.application.usecases;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -10,8 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import io.rafaalberto.transactionstreamprocessor.application.exception.DuplicateTransactionException;
-import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionEventPublisher;
+import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEventAppender;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionCommand;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
@@ -42,9 +40,9 @@ class CreateTransactionUseCaseTest {
         new CreateTransactionCommand(amount, currency, type, OCCURRED_AT, externalReference);
 
     var repository = mock(TransactionRepository.class);
-    var publisher = mock(TransactionEventPublisher.class);
+    var outboxEventAppender = mock(OutboxEventAppender.class);
 
-    var useCase = new CreateTransactionUseCase(repository, publisher);
+    var useCase = new CreateTransactionUseCase(repository, outboxEventAppender);
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
     var result = useCase.execute(command);
@@ -59,12 +57,12 @@ class CreateTransactionUseCaseTest {
     assertThat(result.externalReference()).isEqualTo(externalReference);
 
     verify(repository).save(argThat(tx -> tx.status() == TransactionStatus.CREATED));
-    verify(publisher, times(1))
-        .publish(argThat(event -> event.transactionId().equals(result.id().value())));
+    verify(outboxEventAppender, times(1))
+        .append(argThat(event -> event.topic().equals("transactions.created")));
   }
 
   @Test
-  void shouldReturnExistingTransactionWhenDuplicateDetected() {
+  void shouldReturnExistingTransactionWhenExternalReferenceAlreadyExists() {
     var transactionId = TransactionID.random();
     var amount = BigDecimal.valueOf(100);
     var currency = Currency.BRL;
@@ -81,10 +79,9 @@ class CreateTransactionUseCaseTest {
             transactionId, money, status, type, OCCURRED_AT, CREATED_AT, externalReference);
 
     var repository = mock(TransactionRepository.class);
-    var publisher = mock(TransactionEventPublisher.class);
+    var outboxEventAppender = mock(OutboxEventAppender.class);
 
-    var useCase = new CreateTransactionUseCase(repository, publisher);
-    when(repository.save(any())).thenThrow(new DuplicateTransactionException());
+    var useCase = new CreateTransactionUseCase(repository, outboxEventAppender);
     when(repository.findByExternalReference(externalReference))
         .thenReturn(Optional.of(transaction));
 
@@ -99,34 +96,8 @@ class CreateTransactionUseCaseTest {
     assertThat(result.status()).isEqualTo(TransactionStatus.CREATED);
     assertThat(result.externalReference()).isEqualTo(externalReference);
 
-    verify(repository).save(argThat(tx -> tx.status() == TransactionStatus.CREATED));
     verify(repository).findByExternalReference(externalReference);
-    verify(publisher, never()).publish(any());
-  }
-
-  @Test
-  void shouldThrowIllegalStateWhenDuplicateButNotFound() {
-    var amount = BigDecimal.valueOf(100);
-    var currency = Currency.BRL;
-    var type = TransactionType.CREDIT;
-    var externalReference = "account-service::account-123";
-
-    var command =
-        new CreateTransactionCommand(amount, currency, type, OCCURRED_AT, externalReference);
-
-    var repository = mock(TransactionRepository.class);
-    var publisher = mock(TransactionEventPublisher.class);
-
-    var useCase = new CreateTransactionUseCase(repository, publisher);
-    when(repository.save(any())).thenThrow(new DuplicateTransactionException());
-    when(repository.findByExternalReference(externalReference)).thenReturn(Optional.empty());
-
-    assertThatThrownBy(() -> useCase.execute(command))
-        .isInstanceOf(IllegalStateException.class)
-        .hasMessage("Duplicate reported but transaction not found");
-
-    verify(repository).save(argThat(tx -> tx.status() == TransactionStatus.CREATED));
-    verify(repository).findByExternalReference(externalReference);
-    verify(publisher, never()).publish(any());
+    verify(repository, never()).save(any());
+    verify(outboxEventAppender, never()).append(any());
   }
 }

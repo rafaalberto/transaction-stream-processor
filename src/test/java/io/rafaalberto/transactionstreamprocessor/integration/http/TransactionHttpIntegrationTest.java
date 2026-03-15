@@ -1,7 +1,9 @@
 package io.rafaalberto.transactionstreamprocessor.integration.http;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -9,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
-import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionEventPublisher;
+import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEventAppender;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
@@ -39,7 +41,7 @@ class TransactionHttpIntegrationTest {
 
   @Autowired private ObjectMapper objectMapper;
 
-  @MockitoBean private TransactionEventPublisher transactionEventPublisher;
+  @MockitoBean private OutboxEventAppender outboxEventAppender;
 
   private static final BigDecimal DEFAULT_AMOUNT = BigDecimal.valueOf(100);
   private static final Currency DEFAULT_CURRENCY = Currency.BRL;
@@ -64,7 +66,8 @@ class TransactionHttpIntegrationTest {
         .andExpect(jsonPath("$.money.currency").value(DEFAULT_CURRENCY.name()))
         .andExpect(jsonPath("$.occurredAt").value(DEFAULT_OCCURRED_AT.toString()));
 
-    verify(transactionEventPublisher, atLeastOnce()).publish(any());
+    verify(outboxEventAppender, atLeastOnce())
+        .append(argThat(event -> event.topic().equals("transactions.created")));
   }
 
   @Test
@@ -95,6 +98,8 @@ class TransactionHttpIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
+
+    verify(outboxEventAppender, never()).append(any());
   }
 
   @Test
@@ -117,7 +122,8 @@ class TransactionHttpIntegrationTest {
         .andExpect(jsonPath("$.status").value(TransactionStatus.CREATED.name()))
         .andExpect(jsonPath("$.occurredAt").value(DEFAULT_OCCURRED_AT.toString()));
 
-    verify(transactionEventPublisher, atLeastOnce()).publish(any());
+    verify(outboxEventAppender, atLeastOnce())
+        .append(argThat(event -> event.topic().equals("transactions.created")));
   }
 
   private String createTransaction(final CreateTransactionRequest createRequest) throws Exception {
