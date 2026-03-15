@@ -1,4 +1,4 @@
-package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa;
+package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa.outbox;
 
 import jakarta.persistence.LockModeType;
 import java.util.List;
@@ -12,5 +12,5 @@ public interface OutboxEventJpaRepository extends JpaRepository<OutboxEventEntit
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query(
       "SELECT o FROM OutboxEventEntity o WHERE o.status = :status ORDER BY o.createdAt ASC LIMIT 100")
-  List<OutboxEventEntity> findPendingEvents(@Param("status") String status);
+  List<OutboxEventEntity> findPendingEvents(@Param("status") OutboxEventStatus status);
 }

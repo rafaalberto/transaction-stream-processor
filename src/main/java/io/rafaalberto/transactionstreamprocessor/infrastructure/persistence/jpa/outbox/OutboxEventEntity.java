@@ -1,7 +1,9 @@
-package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa;
+package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa.outbox;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
@@ -21,8 +23,9 @@ public class OutboxEventEntity {
   @Column(columnDefinition = "jsonb", nullable = false)
   private String payload;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "status", length = 32, nullable = false)
-  private String status;
+  private OutboxEventStatus status;
 
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
@@ -33,13 +36,17 @@ public class OutboxEventEntity {
       final UUID id,
       final String topic,
       final String payload,
-      final String status,
+      final OutboxEventStatus status,
       final Instant createdAt) {
     this.id = id;
     this.topic = topic;
     this.payload = payload;
     this.status = status;
     this.createdAt = createdAt;
+  }
+
+  void markAsSent() {
+    this.status = OutboxEventStatus.SENT;
   }
 
   public UUID getId() {
@@ -54,7 +61,7 @@ public class OutboxEventEntity {
     return payload;
   }
 
-  public String getStatus() {
+  public OutboxEventStatus getStatus() {
     return status;
   }
 
