@@ -34,8 +34,6 @@ This service is responsible for **transaction ingestion and lifecycle tracking**
 - Allows querying transactions by ID
 - Exposes consistent and user-friendly error responses
 - Idempotent creation via `externalReference`
-
-### What it will do next
 - Handle failures using DLQ patterns
 - Guarantee atomic persist + publish using the Outbox pattern
 
@@ -91,43 +89,6 @@ An architecture diagram is available at:
 
     docs/diagram.jpg
 
-```
-src/main/java
-├─ domain
-│ └─ transaction
-│   ├─ Transaction
-│   ├─ TransactionID
-│   ├─ Money
-│   ├─ Currency
-│   ├─ TransactionStatus
-│   ├─ TransactionType
-│   └─ exception
-│
-├─ application
-│ ├─ events
-│ ├─ publisher
-│ ├─ repository
-│ ├─ usecases
-│ │   ├─ CreateTransactionUseCase
-│ │   ├─ GetTransactionByIdUseCase
-│ │   └─ ProcessTransactionUseCase
-│   └─ (commands)
-│
-└─ infrastructure
-  ├─ config
-  ├─ http
-  │   ├─ resource
-  │   ├─ controller
-  │   ├─ request
-  │   ├─ response
-  │   └─ exception
-  ├─ messaging
-  │   ├─ consumer
-  │   └─ publisher
-  └─ persistence
-      └─ jpa
-```
-
 ---
 
 ## 🛠 Tech Stack
@@ -147,8 +108,6 @@ src/main/java
 - **Testcontainers** (PostgreSQL, Kafka)
 - **Spotless**
 - **Checkstyle**
-
-### Planned
 - **Dead Letter Queue (DLQ)**
 - **Outbox Pattern**
 
@@ -278,8 +237,6 @@ build/reports/
 - Code quality tooling
 - Kafka: event publishing on transaction creation, consumer for async processing, transaction-processed events
 - Idempotent creation via external reference
-
-### 🔄 Next Steps
 - DLQ handling for failed messages
 - Outbox pattern for atomic persist + publish
 
