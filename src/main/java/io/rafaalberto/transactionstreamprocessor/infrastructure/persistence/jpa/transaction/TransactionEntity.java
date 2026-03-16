@@ -1,4 +1,4 @@
-package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa;
+package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa.transaction;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

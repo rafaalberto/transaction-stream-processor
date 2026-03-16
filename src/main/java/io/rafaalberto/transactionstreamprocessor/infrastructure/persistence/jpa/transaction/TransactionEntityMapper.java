@@ -1,4 +1,4 @@
-package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa;
+package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa.transaction;
 
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
