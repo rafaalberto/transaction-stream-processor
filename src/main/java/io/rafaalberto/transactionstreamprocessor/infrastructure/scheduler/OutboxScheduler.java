@@ -1,6 +1,5 @@
 package io.rafaalberto.transactionstreamprocessor.infrastructure.scheduler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rafaalberto.transactionstreamprocessor.application.events.TransactionCreatedEvent;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.messaging.publisher.KafkaTransactionEventPublisher;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa.outbox.OutboxEventJpaRepository;
@@ -10,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class OutboxScheduler {

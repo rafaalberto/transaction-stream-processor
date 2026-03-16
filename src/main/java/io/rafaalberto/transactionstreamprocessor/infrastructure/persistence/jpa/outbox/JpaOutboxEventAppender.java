@@ -1,12 +1,12 @@
 package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa.outbox;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEvent;
 import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEventAppender;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public final class JpaOutboxEventAppender implements OutboxEventAppender {
@@ -31,7 +31,7 @@ public final class JpaOutboxEventAppender implements OutboxEventAppender {
               OutboxEventStatus.PENDING,
               Instant.now());
       repository.save(entity);
-    } catch (JsonProcessingException ex) {
+    } catch (JacksonException ex) {
       throw new IllegalStateException("Failed to serialize outbox event payload", ex);
     }
   }
