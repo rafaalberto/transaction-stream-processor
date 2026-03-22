@@ -7,15 +7,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.*;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.CreateTransactionController;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.service.CreateTransactionService;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class CreateTransactionControllerTest {
@@ -30,12 +28,15 @@ class CreateTransactionControllerTest {
     var amount = BigDecimal.valueOf(100);
     var currency = Currency.BRL;
     var type = TransactionType.CREDIT;
+    var accountId = new AccountID(UUID.randomUUID());
     var externalReference = "account-service::account-123";
     var createTransactionRequest =
-        new CreateTransactionRequest(amount, currency, type, OCCURRED_AT, externalReference);
+        new CreateTransactionRequest(
+            amount, currency, type, accountId, OCCURRED_AT, externalReference);
 
     var transaction =
-        Transaction.create(new Money(amount, currency), type, OCCURRED_AT, externalReference);
+        Transaction.create(
+            new Money(amount, currency), type, accountId, OCCURRED_AT, externalReference);
 
     when(service.execute(any())).thenReturn(transaction);
 

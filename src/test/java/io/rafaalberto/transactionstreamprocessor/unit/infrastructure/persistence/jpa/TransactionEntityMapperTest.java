@@ -2,6 +2,7 @@ package io.rafaalberto.transactionstreamprocessor.unit.infrastructure.persistenc
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
@@ -10,6 +11,7 @@ import io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa.
 import io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa.transaction.TransactionEntityMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class TransactionEntityMapperTest {
@@ -19,10 +21,11 @@ class TransactionEntityMapperTest {
   @Test
   void shouldMapDomainToEntityAndGetBack() {
     Money money = new Money(new BigDecimal("150.00"), Currency.BRL);
+    var accountId = new AccountID(UUID.randomUUID());
     Instant occurredAt = Instant.parse("2025-01-01T10:15:30Z");
 
     Transaction transactionDomain =
-        Transaction.create(money, TransactionType.DEBIT, occurredAt, "external-ref-123");
+        Transaction.create(money, TransactionType.DEBIT, accountId, occurredAt, "external-ref-123");
 
     TransactionEntity transactionEntity = mapper.toEntity(transactionDomain);
     Transaction restored = mapper.toDomain(transactionEntity);

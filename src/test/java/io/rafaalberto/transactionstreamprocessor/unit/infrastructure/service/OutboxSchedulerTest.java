@@ -27,6 +27,8 @@ import tools.jackson.databind.ObjectMapper;
 
 class OutboxSchedulerTest {
 
+  private static final UUID accountId = UUID.randomUUID();
+
   private static final String CREATED_AT = "2025-03-23T11:00:00Z";
 
   private static final String OCCURRED_AT = "2025-03-23T11:00:01Z";
@@ -48,6 +50,7 @@ class OutboxSchedulerTest {
             UUID.randomUUID(),
             BigDecimal.valueOf(100),
             Currency.BRL,
+            accountId,
             TransactionType.CREDIT,
             Instant.parse(CREATED_AT),
             Instant.parse(OCCURRED_AT),
@@ -88,6 +91,7 @@ class OutboxSchedulerTest {
             UUID.randomUUID(),
             BigDecimal.valueOf(100),
             Currency.BRL,
+            accountId,
             TransactionType.CREDIT,
             Instant.parse(CREATED_AT),
             Instant.parse(OCCURRED_AT),
@@ -119,6 +123,7 @@ class OutboxSchedulerTest {
             UUID.randomUUID(),
             BigDecimal.valueOf(100),
             Currency.BRL,
+            accountId,
             TransactionType.CREDIT,
             Instant.parse(CREATED_AT),
             Instant.parse(OCCURRED_AT),
@@ -129,6 +134,7 @@ class OutboxSchedulerTest {
             UUID.randomUUID(),
             BigDecimal.valueOf(200),
             Currency.USD,
+            accountId,
             TransactionType.DEBIT,
             Instant.parse(CREATED_AT),
             Instant.parse(OCCURRED_AT),

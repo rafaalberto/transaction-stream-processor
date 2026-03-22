@@ -35,6 +35,7 @@ public final class CreateTransactionUseCase {
         Transaction.create(
             new Money(command.amount(), command.currency()),
             command.type(),
+            command.accountId(),
             command.occurredAt(),
             command.externalReference());
     return transactionRepository.save(transaction);
@@ -46,6 +47,7 @@ public final class CreateTransactionUseCase {
             transaction.id().value(),
             transaction.money().amount(),
             transaction.money().currency(),
+            transaction.accountId().value(),
             transaction.type(),
             transaction.occurredAt(),
             transaction.createdAt(),

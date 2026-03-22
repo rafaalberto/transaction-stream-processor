@@ -8,16 +8,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.rafaalberto.transactionstreamprocessor.application.usecases.GetTransactionByIdUseCase;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionID;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.*;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.TransactionNotFoundException;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.GetTransactionByIdController;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class GetTransactionByIdControllerTest {
@@ -34,13 +30,21 @@ class GetTransactionByIdControllerTest {
     var amount = BigDecimal.valueOf(100);
     var currency = Currency.BRL;
     var money = new Money(amount, currency);
+    var accountId = new AccountID(UUID.randomUUID());
     var status = TransactionStatus.CREATED;
     var type = TransactionType.CREDIT;
     var externalReference = "account-service::account-123";
 
     var transaction =
         Transaction.restore(
-            transactionId, money, status, type, OCCURRED_AT, CREATED_AT, externalReference);
+            transactionId,
+            money,
+            accountId,
+            status,
+            type,
+            OCCURRED_AT,
+            CREATED_AT,
+            externalReference);
 
     when(getTransactionByIdUseCase.execute(transactionId)).thenReturn(transaction);
 

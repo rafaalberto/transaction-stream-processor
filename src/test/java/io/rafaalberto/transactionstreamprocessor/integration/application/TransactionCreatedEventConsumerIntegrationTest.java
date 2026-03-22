@@ -8,11 +8,7 @@ import static org.mockito.Mockito.verify;
 import io.rafaalberto.transactionstreamprocessor.application.events.TransactionCreatedEvent;
 import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionProcessedEventPublisher;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.*;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.config.KafkaTopics;
 import io.rafaalberto.transactionstreamprocessor.integration.config.KafkaInitializer;
 import io.rafaalberto.transactionstreamprocessor.integration.config.PostgresInitializer;
@@ -45,9 +41,11 @@ class TransactionCreatedEventConsumerIntegrationTest {
   @Test
   void shouldConsumeEventAndProcessTransaction() {
     var money = new Money(BigDecimal.valueOf(100), Currency.BRL);
+    var accountId = new AccountID(UUID.randomUUID());
     var externalReference = "kafka-test-" + UUID.randomUUID();
     var transaction =
-        Transaction.create(money, TransactionType.CREDIT, OCCURRED_AT, externalReference);
+        Transaction.create(
+            money, TransactionType.CREDIT, accountId, OCCURRED_AT, externalReference);
 
     transactionRepository.save(transaction);
 
@@ -56,6 +54,7 @@ class TransactionCreatedEventConsumerIntegrationTest {
             transaction.id().value(),
             transaction.money().amount(),
             transaction.money().currency(),
+            transaction.accountId().value(),
             transaction.type(),
             transaction.occurredAt(),
             transaction.createdAt(),

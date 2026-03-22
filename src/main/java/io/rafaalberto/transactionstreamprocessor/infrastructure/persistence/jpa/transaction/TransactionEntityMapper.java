@@ -1,5 +1,6 @@
 package io.rafaalberto.transactionstreamprocessor.infrastructure.persistence.jpa.transaction;
 
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
@@ -16,6 +17,7 @@ public final class TransactionEntityMapper {
         transaction.id().value(),
         transaction.money().amount(),
         transaction.money().currency().name(),
+        transaction.accountId().value(),
         transaction.status().name(),
         transaction.type().name(),
         transaction.occurredAt(),
@@ -29,6 +31,7 @@ public final class TransactionEntityMapper {
     return Transaction.restore(
         new TransactionID(entity.getId()),
         new Money(entity.getAmount(), Currency.valueOf(entity.getCurrency())),
+        new AccountID(entity.getAccountId()),
         TransactionStatus.valueOf(entity.getStatus()),
         TransactionType.valueOf(entity.getType()),
         entity.getOccurredAt(),

@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEventAppender;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
@@ -45,6 +46,7 @@ class TransactionHttpIntegrationTest {
 
   private static final BigDecimal DEFAULT_AMOUNT = BigDecimal.valueOf(100);
   private static final Currency DEFAULT_CURRENCY = Currency.BRL;
+  private static final AccountID DEFAULT_ACCOUNT_ID = new AccountID(UUID.randomUUID());
   private static final TransactionType DEFAULT_TYPE = TransactionType.CREDIT;
   private static final Instant DEFAULT_OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
 
@@ -53,7 +55,12 @@ class TransactionHttpIntegrationTest {
     var externalReference = "account-service-" + UUID.randomUUID();
     var request =
         new CreateTransactionRequest(
-            DEFAULT_AMOUNT, DEFAULT_CURRENCY, DEFAULT_TYPE, DEFAULT_OCCURRED_AT, externalReference);
+            DEFAULT_AMOUNT,
+            DEFAULT_CURRENCY,
+            DEFAULT_TYPE,
+            DEFAULT_ACCOUNT_ID,
+            DEFAULT_OCCURRED_AT,
+            externalReference);
 
     mockMvc
         .perform(
@@ -89,6 +96,7 @@ class TransactionHttpIntegrationTest {
             BigDecimal.valueOf(0),
             DEFAULT_CURRENCY,
             DEFAULT_TYPE,
+            DEFAULT_ACCOUNT_ID,
             DEFAULT_OCCURRED_AT,
             externalReference);
 
@@ -107,7 +115,12 @@ class TransactionHttpIntegrationTest {
     var externalReference = "account-service-" + UUID.randomUUID();
     var createRequest =
         new CreateTransactionRequest(
-            DEFAULT_AMOUNT, DEFAULT_CURRENCY, DEFAULT_TYPE, DEFAULT_OCCURRED_AT, externalReference);
+            DEFAULT_AMOUNT,
+            DEFAULT_CURRENCY,
+            DEFAULT_TYPE,
+            DEFAULT_ACCOUNT_ID,
+            DEFAULT_OCCURRED_AT,
+            externalReference);
 
     var responseBody = createTransaction(createRequest);
 

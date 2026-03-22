@@ -1,5 +1,6 @@
 package io.rafaalberto.transactionstreamprocessor.application.usecases;
 
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import java.math.BigDecimal;
@@ -9,5 +10,6 @@ public record CreateTransactionCommand(
     BigDecimal amount,
     Currency currency,
     TransactionType type,
+    AccountID accountId,
     Instant occurredAt,
     String externalReference) {}

@@ -40,6 +40,8 @@ class TransactionCreatedEventConsumerDlqIntegrationTest {
 
   @MockitoBean private ProcessTransactionUseCase processTransactionUseCase;
 
+  private static final UUID accountId = UUID.randomUUID();
+
   private static final Instant OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
 
   @Test
@@ -55,6 +57,7 @@ class TransactionCreatedEventConsumerDlqIntegrationTest {
             transactionId,
             BigDecimal.valueOf(100),
             Currency.BRL,
+            accountId,
             TransactionType.CREDIT,
             OCCURRED_AT,
             Instant.now(),

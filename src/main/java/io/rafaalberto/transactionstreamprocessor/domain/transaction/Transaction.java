@@ -11,6 +11,7 @@ public final class Transaction {
   private final TransactionID id;
   private final Money money;
   private final TransactionType type;
+  private final AccountID accountId;
   private final Instant occurredAt;
   private final Instant createdAt;
   private final TransactionStatus status;
@@ -20,6 +21,7 @@ public final class Transaction {
       final TransactionID id,
       final Money money,
       final TransactionType type,
+      final AccountID accountId,
       final Instant occurredAt,
       final Instant createdAt,
       final TransactionStatus status,
@@ -27,6 +29,7 @@ public final class Transaction {
     this.id = requireNonNull(id, "TransactionID cannot be null");
     this.money = requireNonNull(money, "Money cannot be null");
     this.type = requireNonNull(type, "Type cannot be null");
+    this.accountId = requireNonNull(accountId, "AccountID cannot be null");
     this.occurredAt = requireNonNull(occurredAt, "OccurredAt cannot be null");
     this.createdAt = requireNonNull(createdAt, "CreatedAt cannot be null");
     this.status = requireNonNull(status, "Status cannot be null");
@@ -37,12 +40,14 @@ public final class Transaction {
   public static Transaction create(
       final Money money,
       final TransactionType type,
+      final AccountID accountId,
       final Instant occurredAt,
       final String externalReference) {
     return new Transaction(
         TransactionID.random(),
         money,
         type,
+        accountId,
         occurredAt,
         Instant.now(),
         TransactionStatus.CREATED,
@@ -52,13 +57,14 @@ public final class Transaction {
   public static Transaction restore(
       final TransactionID transactionID,
       final Money money,
+      final AccountID accountId,
       final TransactionStatus status,
       final TransactionType type,
       final Instant occurredAt,
       final Instant createdAt,
       final String externalReference) {
     return new Transaction(
-        transactionID, money, type, occurredAt, createdAt, status, externalReference);
+        transactionID, money, type, accountId, occurredAt, createdAt, status, externalReference);
   }
 
   public Transaction process() {
@@ -69,6 +75,7 @@ public final class Transaction {
         this.id,
         this.money,
         this.type,
+        this.accountId,
         this.occurredAt,
         this.createdAt,
         TransactionStatus.PROCESSED,
@@ -85,6 +92,10 @@ public final class Transaction {
 
   public TransactionType type() {
     return type;
+  }
+
+  public AccountID accountId() {
+    return accountId;
   }
 
   public Instant occurredAt() {
