@@ -3,7 +3,13 @@ package io.rafaalberto.transactionstreamprocessor.unit.domain.transaction;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.*;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;

@@ -9,7 +9,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.*;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.TransactionNotFoundException;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.CreateTransactionController;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.GetTransactionByIdController;
@@ -32,7 +36,7 @@ import tools.jackson.databind.ObjectMapper;
 @WebMvcTest(TransactionResource.class)
 class TransactionResourceTest {
 
-  private static final AccountID accountId = new AccountID(UUID.randomUUID());
+  private static final AccountID ACCOUNT_ID = new AccountID(UUID.randomUUID());
   private static final Instant OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
   private static final Instant CREATED_AT = Instant.parse("2025-03-23T11:00:30Z");
 
@@ -53,13 +57,13 @@ class TransactionResourceTest {
 
     var request =
         new CreateTransactionRequest(
-            amount, currency, type, accountId, OCCURRED_AT, externalReference);
+            amount, currency, type, ACCOUNT_ID, OCCURRED_AT, externalReference);
 
     var response =
         new TransactionResponse(
             transactionId.value(),
             new MoneyResponse(amount, currency.name()),
-            accountId,
+            ACCOUNT_ID,
             OCCURRED_AT,
             CREATED_AT);
 
@@ -87,7 +91,7 @@ class TransactionResourceTest {
             BigDecimal.ZERO,
             Currency.BRL,
             TransactionType.CREDIT,
-            accountId,
+            ACCOUNT_ID,
             Instant.parse("2025-03-23T11:00:00Z"),
             "account-service::account-123");
 
@@ -152,7 +156,7 @@ class TransactionResourceTest {
             BigDecimal.ONE,
             Currency.BRL,
             TransactionType.CREDIT,
-            accountId,
+            ACCOUNT_ID,
             Instant.parse("2025-03-23T11:00:00Z"),
             "");
 
@@ -189,7 +193,7 @@ class TransactionResourceTest {
 
     var request =
         new CreateTransactionRequest(
-            amount, currency, type, accountId, OCCURRED_AT, externalReference);
+            amount, currency, type, ACCOUNT_ID, OCCURRED_AT, externalReference);
 
     when(createTransactionController.create(any()))
         .thenThrow(new IllegalStateException("Duplicate reported but transaction not found"));

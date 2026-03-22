@@ -13,7 +13,13 @@ import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEventA
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionCommand;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.*;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;

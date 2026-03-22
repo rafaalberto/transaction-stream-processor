@@ -7,7 +7,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.*;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.controller.CreateTransactionController;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.service.CreateTransactionService;

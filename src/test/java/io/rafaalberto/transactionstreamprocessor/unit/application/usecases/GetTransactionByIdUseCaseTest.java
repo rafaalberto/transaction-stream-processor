@@ -8,7 +8,13 @@ import static org.mockito.Mockito.when;
 
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.GetTransactionByIdUseCase;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.*;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionID;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.exception.TransactionNotFoundException;
 import java.math.BigDecimal;
 import java.time.Instant;
