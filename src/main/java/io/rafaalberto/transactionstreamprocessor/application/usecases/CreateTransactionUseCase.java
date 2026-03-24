@@ -4,6 +4,7 @@ import io.rafaalberto.transactionstreamprocessor.application.events.TransactionC
 import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEvent;
 import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEventAppender;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
 
@@ -35,7 +36,7 @@ public final class CreateTransactionUseCase {
         Transaction.create(
             new Money(command.amount(), command.currency()),
             command.type(),
-            command.accountId(),
+            new AccountID(command.accountId()),
             command.occurredAt(),
             command.externalReference());
     return transactionRepository.save(transaction);

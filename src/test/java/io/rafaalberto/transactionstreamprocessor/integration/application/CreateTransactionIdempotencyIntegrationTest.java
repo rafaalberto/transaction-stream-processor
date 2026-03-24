@@ -9,7 +9,6 @@ import io.rafaalberto.transactionstreamprocessor.application.exception.Duplicate
 import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEventAppender;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionCommand;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
@@ -48,7 +47,7 @@ class CreateTransactionIdempotencyIntegrationTest {
 
   @Test
   void shouldBeIdempotentWhenUsingSameExternalReference() {
-    var accountId = new AccountID(UUID.randomUUID());
+    var accountId = UUID.randomUUID();
     var externalReference = "account-service::" + UUID.randomUUID();
     var command =
         new CreateTransactionCommand(
@@ -75,7 +74,7 @@ class CreateTransactionIdempotencyIntegrationTest {
 
   @Test
   void shouldBeIdempotentUnderConcurrentRequests() throws Exception {
-    var accountId = new AccountID(UUID.randomUUID());
+    var accountId = UUID.randomUUID();
     var externalReference = "account-service::" + UUID.randomUUID();
     var command =
         new CreateTransactionCommand(

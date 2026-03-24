@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
@@ -36,7 +35,7 @@ import tools.jackson.databind.ObjectMapper;
 @WebMvcTest(TransactionResource.class)
 class TransactionResourceTest {
 
-  private static final AccountID ACCOUNT_ID = new AccountID(UUID.randomUUID());
+  private static final UUID ACCOUNT_ID = UUID.randomUUID();
   private static final Instant OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
   private static final Instant CREATED_AT = Instant.parse("2025-03-23T11:00:30Z");
 

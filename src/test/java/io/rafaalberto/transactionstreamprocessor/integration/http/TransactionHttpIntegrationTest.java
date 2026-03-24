@@ -12,7 +12,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEventAppender;
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionStatus;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
@@ -46,7 +45,7 @@ class TransactionHttpIntegrationTest {
 
   private static final BigDecimal DEFAULT_AMOUNT = BigDecimal.valueOf(100);
   private static final Currency DEFAULT_CURRENCY = Currency.BRL;
-  private static final AccountID DEFAULT_ACCOUNT_ID = new AccountID(UUID.randomUUID());
+  private static final UUID DEFAULT_ACCOUNT_ID = UUID.randomUUID();
   private static final TransactionType DEFAULT_TYPE = TransactionType.CREDIT;
   private static final Instant DEFAULT_OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
 

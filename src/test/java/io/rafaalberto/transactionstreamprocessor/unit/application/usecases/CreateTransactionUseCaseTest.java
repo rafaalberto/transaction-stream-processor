@@ -36,7 +36,7 @@ class CreateTransactionUseCaseTest {
     var amount = BigDecimal.valueOf(100);
     var currency = Currency.BRL;
     var type = TransactionType.CREDIT;
-    var accountId = new AccountID(UUID.randomUUID());
+    var accountId = UUID.randomUUID();
     var externalReference = "account-service::account-123";
 
     var command =
@@ -71,7 +71,7 @@ class CreateTransactionUseCaseTest {
     var amount = BigDecimal.valueOf(100);
     var currency = Currency.BRL;
     var money = new Money(amount, currency);
-    var accountId = new AccountID(UUID.randomUUID());
+    var accountId = UUID.randomUUID();
     var status = TransactionStatus.CREATED;
     var type = TransactionType.CREDIT;
     var externalReference = "account-service::account-123";
@@ -84,7 +84,7 @@ class CreateTransactionUseCaseTest {
         Transaction.restore(
             transactionId,
             money,
-            accountId,
+            new AccountID(accountId),
             status,
             type,
             OCCURRED_AT,

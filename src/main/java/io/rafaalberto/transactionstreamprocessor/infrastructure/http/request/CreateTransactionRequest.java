@@ -1,6 +1,5 @@
 package io.rafaalberto.transactionstreamprocessor.infrastructure.http.request;
 
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import jakarta.validation.constraints.DecimalMin;
@@ -9,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 public record CreateTransactionRequest(
     @NotNull(message = "amount is required")
@@ -16,7 +16,7 @@ public record CreateTransactionRequest(
         BigDecimal amount,
     @NotNull(message = "currency is required") Currency currency,
     @NotNull(message = "type is required") TransactionType type,
-    @NotNull(message = "accountID is required") AccountID accountId,
+    @NotNull(message = "accountID is required") UUID accountId,
     @NotNull(message = "occurredAt is required") Instant occurredAt,
     @NotBlank(message = "externalReference is required")
         @Size(max = 100, message = "externalReference must be at most 100 characters")

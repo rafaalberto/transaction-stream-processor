@@ -4,7 +4,6 @@ import static io.rafaalberto.transactionstreamprocessor.domain.transaction.Trans
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import io.rafaalberto.transactionstreamprocessor.infrastructure.http.request.CreateTransactionRequest;
@@ -34,7 +33,7 @@ class TransactionFlowAcceptanceTest {
 
   private RestClient restClient;
 
-  private AccountID accountId;
+  private UUID accountId;
   private String externalReference;
 
   @LocalServerPort private int port;
@@ -42,7 +41,7 @@ class TransactionFlowAcceptanceTest {
   @BeforeEach
   void setup() {
     this.restClient = RestClient.builder().baseUrl("http://localhost:" + port).build();
-    this.accountId = new AccountID(UUID.randomUUID());
+    this.accountId = UUID.randomUUID();
     this.externalReference = "external-reference-" + UUID.randomUUID();
   }
 

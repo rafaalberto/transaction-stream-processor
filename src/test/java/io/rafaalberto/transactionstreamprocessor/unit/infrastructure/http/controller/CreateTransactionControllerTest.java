@@ -32,7 +32,7 @@ class CreateTransactionControllerTest {
     var amount = BigDecimal.valueOf(100);
     var currency = Currency.BRL;
     var type = TransactionType.CREDIT;
-    var accountId = new AccountID(UUID.randomUUID());
+    var accountId = UUID.randomUUID();
     var externalReference = "account-service::account-123";
     var createTransactionRequest =
         new CreateTransactionRequest(
@@ -40,7 +40,11 @@ class CreateTransactionControllerTest {
 
     var transaction =
         Transaction.create(
-            new Money(amount, currency), type, accountId, OCCURRED_AT, externalReference);
+            new Money(amount, currency),
+            type,
+            new AccountID(accountId),
+            OCCURRED_AT,
+            externalReference);
 
     when(service.execute(any())).thenReturn(transaction);
 
