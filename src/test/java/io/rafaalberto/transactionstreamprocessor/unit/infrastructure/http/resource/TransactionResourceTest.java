@@ -266,12 +266,12 @@ class TransactionResourceTest {
   }
 
   @Test
-  void shouldReturnBadRequestWhenTransactionIDIsInvalid() throws Exception {
+  void shouldReturnBadRequestWhenTransactionIdIsInvalid() throws Exception {
     mockMvc
         .perform(get("/transactions/{id}", "invalid-uuid").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Invalid transaction"))
-        .andExpect(jsonPath("$.details[0]").value("Invalid transaction rawId: invalid-uuid"));
+        .andExpect(jsonPath("$.details[0]").value("Invalid transaction ID: invalid-uuid"));
 
     verifyNoMoreInteractions(getTransactionByIdController);
   }
