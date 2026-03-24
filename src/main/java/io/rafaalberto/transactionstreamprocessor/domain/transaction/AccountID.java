@@ -10,11 +10,11 @@ public record AccountID(UUID value) {
     Objects.requireNonNull(value, "AccountId value cannot be null");
   }
 
-  public static AccountID from(final String rawId) {
+  public static AccountID from(final String id) {
     try {
-      return new AccountID(UUID.fromString(rawId));
+      return new AccountID(UUID.fromString(id));
     } catch (IllegalArgumentException ex) {
-      throw new InvalidTransactionException("Invalid account rawId: " + rawId);
+      throw new InvalidTransactionException("Invalid account ID: " + id);
     }
   }
 }

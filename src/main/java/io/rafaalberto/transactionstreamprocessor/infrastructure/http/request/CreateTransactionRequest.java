@@ -16,7 +16,7 @@ public record CreateTransactionRequest(
         BigDecimal amount,
     @NotNull(message = "currency is required") Currency currency,
     @NotNull(message = "type is required") TransactionType type,
-    @NotNull(message = "accountID is required") UUID accountId,
+    @NotNull(message = "accountId is required") UUID accountId,
     @NotNull(message = "occurredAt is required") Instant occurredAt,
     @NotBlank(message = "externalReference is required")
         @Size(max = 100, message = "externalReference must be at most 100 characters")

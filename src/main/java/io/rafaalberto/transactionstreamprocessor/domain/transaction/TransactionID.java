@@ -14,11 +14,11 @@ public record TransactionID(UUID value) {
     return new TransactionID(UUID.randomUUID());
   }
 
-  public static TransactionID from(final String rawId) {
+  public static TransactionID from(final String id) {
     try {
-      return new TransactionID(UUID.fromString(rawId));
+      return new TransactionID(UUID.fromString(id));
     } catch (IllegalArgumentException ex) {
-      throw new InvalidTransactionException("Invalid transaction rawId: " + rawId);
+      throw new InvalidTransactionException("Invalid transaction ID: " + id);
     }
   }
 }

@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record TransactionResponse(
-    UUID id, MoneyResponse money, UUID accountID, Instant occurredAt, Instant createdAt) {
+    UUID id, MoneyResponse money, UUID accountId, Instant occurredAt, Instant createdAt) {
 
   public static TransactionResponse from(final Transaction transaction) {
     return new TransactionResponse(
