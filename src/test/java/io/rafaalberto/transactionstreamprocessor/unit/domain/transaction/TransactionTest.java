@@ -111,11 +111,11 @@ class TransactionTest {
         Transaction.restore(
             TransactionID.random(),
             new Money(BigDecimal.valueOf(100), Currency.BRL),
-            ACCOUNT_ID,
-            TransactionStatus.PROCESSED,
             TransactionType.CREDIT,
+            ACCOUNT_ID,
             OCCURRED_AT,
             CREATED_AT,
+            TransactionStatus.PROCESSED,
             "ref-123");
 
     var result = transaction.process();

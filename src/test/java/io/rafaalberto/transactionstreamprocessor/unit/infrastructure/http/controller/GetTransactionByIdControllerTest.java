@@ -45,11 +45,11 @@ class GetTransactionByIdControllerTest {
         Transaction.restore(
             transactionId,
             money,
-            accountId,
-            status,
             type,
+            accountId,
             OCCURRED_AT,
             CREATED_AT,
+            status,
             externalReference);
 
     when(getTransactionByIdUseCase.execute(transactionId)).thenReturn(transaction);

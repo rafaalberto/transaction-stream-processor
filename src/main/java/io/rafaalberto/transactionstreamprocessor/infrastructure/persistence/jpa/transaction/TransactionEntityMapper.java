@@ -31,11 +31,11 @@ public final class TransactionEntityMapper {
     return Transaction.restore(
         new TransactionID(entity.getId()),
         new Money(entity.getAmount(), Currency.valueOf(entity.getCurrency())),
-        new AccountID(entity.getAccountId()),
-        TransactionStatus.valueOf(entity.getStatus()),
         TransactionType.valueOf(entity.getType()),
+        new AccountID(entity.getAccountId()),
         entity.getOccurredAt(),
         entity.getCreatedAt(),
+        TransactionStatus.valueOf(entity.getStatus()),
         entity.getExternalReference());
   }
 }

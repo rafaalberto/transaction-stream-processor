@@ -43,11 +43,11 @@ class GetTransactionByIdUseCaseTest {
         Transaction.restore(
             transactionId,
             money,
-            accountId,
-            status,
             type,
+            accountId,
             OCCURRED_AT,
             CREATED_AT,
+            status,
             externalReference);
 
     var repository = mock(TransactionRepository.class);

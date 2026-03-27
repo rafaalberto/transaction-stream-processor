@@ -84,11 +84,11 @@ class CreateTransactionUseCaseTest {
         Transaction.restore(
             transactionId,
             money,
-            new AccountID(accountId),
-            status,
             type,
+            new AccountID(accountId),
             OCCURRED_AT,
             CREATED_AT,
+            status,
             externalReference);
 
     var repository = mock(TransactionRepository.class);

@@ -57,11 +57,11 @@ public final class Transaction {
   public static Transaction restore(
       final TransactionID transactionID,
       final Money money,
-      final AccountID accountId,
-      final TransactionStatus status,
       final TransactionType type,
+      final AccountID accountId,
       final Instant occurredAt,
       final Instant createdAt,
+      final TransactionStatus status,
       final String externalReference) {
     return new Transaction(
         transactionID, money, type, accountId, occurredAt, createdAt, status, externalReference);
