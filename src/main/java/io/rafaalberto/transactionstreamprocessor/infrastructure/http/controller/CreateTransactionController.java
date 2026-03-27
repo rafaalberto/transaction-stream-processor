@@ -19,6 +19,7 @@ public class CreateTransactionController {
             request.amount(),
             request.currency(),
             request.type(),
+            request.accountId(),
             request.occurredAt(),
             request.externalReference());
 

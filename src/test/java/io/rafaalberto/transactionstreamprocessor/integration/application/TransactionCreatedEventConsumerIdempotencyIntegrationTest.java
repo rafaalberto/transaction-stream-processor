@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import io.rafaalberto.transactionstreamprocessor.application.events.TransactionCreatedEvent;
 import io.rafaalberto.transactionstreamprocessor.application.publisher.TransactionProcessedEventPublisher;
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
@@ -45,9 +46,11 @@ class TransactionCreatedEventConsumerIdempotencyIntegrationTest {
   @Test
   void shouldConsumeEventAndProcessTransactionIdempotently() {
     var money = new Money(BigDecimal.valueOf(100), Currency.BRL);
+    var accountId = new AccountID(UUID.randomUUID());
     var externalReference = "kafka-test-" + UUID.randomUUID();
     var transaction =
-        Transaction.create(money, TransactionType.CREDIT, OCCURRED_AT, externalReference);
+        Transaction.create(
+            money, TransactionType.CREDIT, accountId, OCCURRED_AT, externalReference);
 
     transactionRepository.save(transaction);
 
@@ -56,6 +59,7 @@ class TransactionCreatedEventConsumerIdempotencyIntegrationTest {
             transaction.id().value(),
             transaction.money().amount(),
             transaction.money().currency(),
+            accountId.value(),
             transaction.type(),
             transaction.occurredAt(),
             transaction.createdAt(),

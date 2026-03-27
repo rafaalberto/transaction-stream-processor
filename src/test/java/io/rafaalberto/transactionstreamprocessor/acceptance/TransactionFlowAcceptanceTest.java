@@ -33,6 +33,7 @@ class TransactionFlowAcceptanceTest {
 
   private RestClient restClient;
 
+  private UUID accountId;
   private String externalReference;
 
   @LocalServerPort private int port;
@@ -40,6 +41,7 @@ class TransactionFlowAcceptanceTest {
   @BeforeEach
   void setup() {
     this.restClient = RestClient.builder().baseUrl("http://localhost:" + port).build();
+    this.accountId = UUID.randomUUID();
     this.externalReference = "external-reference-" + UUID.randomUUID();
   }
 
@@ -50,6 +52,7 @@ class TransactionFlowAcceptanceTest {
             BigDecimal.ONE,
             Currency.BRL,
             TransactionType.CREDIT,
+            accountId,
             Instant.parse("2025-03-23T11:00:00Z"),
             externalReference);
 
@@ -102,6 +105,7 @@ class TransactionFlowAcceptanceTest {
             BigDecimal.ZERO,
             Currency.BRL,
             TransactionType.CREDIT,
+            accountId,
             Instant.parse("2025-03-23T11:00:00Z"),
             externalReference);
 

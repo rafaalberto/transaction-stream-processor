@@ -5,10 +5,15 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record TransactionProcessedEvent(
-    UUID transactionId, String status, Instant processedAt, String externalReference) {
+    UUID transactionId,
+    UUID accountId,
+    String status,
+    Instant processedAt,
+    String externalReference) {
   public static TransactionProcessedEvent from(final Transaction transaction) {
     return new TransactionProcessedEvent(
         transaction.id().value(),
+        transaction.accountId().value(),
         transaction.status().toString(),
         transaction.occurredAt(),
         transaction.externalReference());

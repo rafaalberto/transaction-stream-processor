@@ -10,6 +10,7 @@ public record TransactionCreatedEvent(
     UUID transactionId,
     BigDecimal amount,
     Currency currency,
+    UUID accountId,
     TransactionType type,
     Instant occurredAt,
     Instant createdAt,

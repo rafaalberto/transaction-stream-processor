@@ -22,6 +22,9 @@ public class TransactionEntity {
   @Column(name = "currency", length = 3, nullable = false)
   private String currency;
 
+  @Column(name = "account_id", nullable = false)
+  private UUID accountId;
+
   @Column(name = "status", length = 32, nullable = false)
   private String status;
 
@@ -43,6 +46,7 @@ public class TransactionEntity {
       final UUID id,
       final BigDecimal amount,
       final String currency,
+      final UUID accountId,
       final String status,
       final String type,
       final Instant occurredAt,
@@ -51,6 +55,7 @@ public class TransactionEntity {
     this.id = id;
     this.amount = amount;
     this.currency = currency;
+    this.accountId = accountId;
     this.status = status;
     this.type = type;
     this.occurredAt = occurredAt;
@@ -68,6 +73,10 @@ public class TransactionEntity {
 
   public String getCurrency() {
     return currency;
+  }
+
+  public UUID getAccountId() {
+    return accountId;
   }
 
   public String getStatus() {

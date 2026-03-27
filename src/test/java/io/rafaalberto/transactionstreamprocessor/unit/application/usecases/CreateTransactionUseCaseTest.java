@@ -13,6 +13,7 @@ import io.rafaalberto.transactionstreamprocessor.application.outbox.OutboxEventA
 import io.rafaalberto.transactionstreamprocessor.application.repository.TransactionRepository;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionCommand;
 import io.rafaalberto.transactionstreamprocessor.application.usecases.CreateTransactionUseCase;
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
@@ -22,6 +23,7 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionT
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class CreateTransactionUseCaseTest {
@@ -34,10 +36,12 @@ class CreateTransactionUseCaseTest {
     var amount = BigDecimal.valueOf(100);
     var currency = Currency.BRL;
     var type = TransactionType.CREDIT;
+    var accountId = UUID.randomUUID();
     var externalReference = "account-service::account-123";
 
     var command =
-        new CreateTransactionCommand(amount, currency, type, OCCURRED_AT, externalReference);
+        new CreateTransactionCommand(
+            amount, currency, type, accountId, OCCURRED_AT, externalReference);
 
     var repository = mock(TransactionRepository.class);
     var outboxEventAppender = mock(OutboxEventAppender.class);
@@ -67,16 +71,25 @@ class CreateTransactionUseCaseTest {
     var amount = BigDecimal.valueOf(100);
     var currency = Currency.BRL;
     var money = new Money(amount, currency);
+    var accountId = UUID.randomUUID();
     var status = TransactionStatus.CREATED;
     var type = TransactionType.CREDIT;
     var externalReference = "account-service::account-123";
 
     var command =
-        new CreateTransactionCommand(amount, currency, type, OCCURRED_AT, externalReference);
+        new CreateTransactionCommand(
+            amount, currency, type, accountId, OCCURRED_AT, externalReference);
 
     var transaction =
         Transaction.restore(
-            transactionId, money, status, type, OCCURRED_AT, CREATED_AT, externalReference);
+            transactionId,
+            money,
+            type,
+            new AccountID(accountId),
+            OCCURRED_AT,
+            CREATED_AT,
+            status,
+            externalReference);
 
     var repository = mock(TransactionRepository.class);
     var outboxEventAppender = mock(OutboxEventAppender.class);

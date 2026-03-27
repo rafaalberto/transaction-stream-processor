@@ -35,6 +35,7 @@ import tools.jackson.databind.ObjectMapper;
 @WebMvcTest(TransactionResource.class)
 class TransactionResourceTest {
 
+  private static final UUID ACCOUNT_ID = UUID.randomUUID();
   private static final Instant OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
   private static final Instant CREATED_AT = Instant.parse("2025-03-23T11:00:30Z");
 
@@ -54,12 +55,14 @@ class TransactionResourceTest {
     var externalReference = "account-service::account-123";
 
     var request =
-        new CreateTransactionRequest(amount, currency, type, OCCURRED_AT, externalReference);
+        new CreateTransactionRequest(
+            amount, currency, type, ACCOUNT_ID, OCCURRED_AT, externalReference);
 
     var response =
         new TransactionResponse(
             transactionId.value(),
             new MoneyResponse(amount, currency.name()),
+            ACCOUNT_ID,
             OCCURRED_AT,
             CREATED_AT);
 
@@ -87,6 +90,7 @@ class TransactionResourceTest {
             BigDecimal.ZERO,
             Currency.BRL,
             TransactionType.CREDIT,
+            ACCOUNT_ID,
             Instant.parse("2025-03-23T11:00:00Z"),
             "account-service::account-123");
 
@@ -151,6 +155,7 @@ class TransactionResourceTest {
             BigDecimal.ONE,
             Currency.BRL,
             TransactionType.CREDIT,
+            ACCOUNT_ID,
             Instant.parse("2025-03-23T11:00:00Z"),
             "");
 
@@ -186,7 +191,8 @@ class TransactionResourceTest {
     var externalReference = "account-service::account-123";
 
     var request =
-        new CreateTransactionRequest(amount, currency, type, OCCURRED_AT, externalReference);
+        new CreateTransactionRequest(
+            amount, currency, type, ACCOUNT_ID, OCCURRED_AT, externalReference);
 
     when(createTransactionController.create(any()))
         .thenThrow(new IllegalStateException("Duplicate reported but transaction not found"));
@@ -260,12 +266,12 @@ class TransactionResourceTest {
   }
 
   @Test
-  void shouldReturnBadRequestWhenTransactionIDIsInvalid() throws Exception {
+  void shouldReturnBadRequestWhenTransactionIdIsInvalid() throws Exception {
     mockMvc
         .perform(get("/transactions/{id}", "invalid-uuid").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Invalid transaction"))
-        .andExpect(jsonPath("$.details[0]").value("Invalid transaction rawId: invalid-uuid"));
+        .andExpect(jsonPath("$.details[0]").value("Invalid transaction ID: invalid-uuid"));
 
     verifyNoMoreInteractions(getTransactionByIdController);
   }

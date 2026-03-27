@@ -3,6 +3,7 @@ package io.rafaalberto.transactionstreamprocessor.unit.domain.transaction;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import io.rafaalberto.transactionstreamprocessor.domain.transaction.AccountID;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Currency;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Money;
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.Transaction;
@@ -11,10 +12,12 @@ import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionS
 import io.rafaalberto.transactionstreamprocessor.domain.transaction.TransactionType;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class TransactionTest {
 
+  private static final AccountID ACCOUNT_ID = new AccountID(UUID.randomUUID());
   private static final Instant OCCURRED_AT = Instant.parse("2025-03-23T11:00:00Z");
   private static final Instant CREATED_AT = Instant.parse("2025-03-23T15:00:00Z");
 
@@ -24,7 +27,8 @@ class TransactionTest {
     var money = new Money(amount, Currency.BRL);
     var externalReference = "account-service::account-123";
     var transaction =
-        Transaction.create(money, TransactionType.CREDIT, OCCURRED_AT, externalReference);
+        Transaction.create(
+            money, TransactionType.CREDIT, ACCOUNT_ID, OCCURRED_AT, externalReference);
 
     assertThat(transaction.id()).isNotNull();
     assertThat(transaction.money().amount()).isEqualTo(amount);
@@ -42,7 +46,9 @@ class TransactionTest {
     var exception =
         assertThrows(
             NullPointerException.class,
-            () -> Transaction.create(null, TransactionType.CREDIT, OCCURRED_AT, externalReference));
+            () ->
+                Transaction.create(
+                    null, TransactionType.CREDIT, ACCOUNT_ID, OCCURRED_AT, externalReference));
     assertThat(exception.getMessage()).isEqualTo("Money cannot be null");
   }
 
@@ -55,7 +61,7 @@ class TransactionTest {
     var exception =
         assertThrows(
             NullPointerException.class,
-            () -> Transaction.create(money, null, OCCURRED_AT, externalReference));
+            () -> Transaction.create(money, null, ACCOUNT_ID, OCCURRED_AT, externalReference));
     assertThat(exception.getMessage()).isEqualTo("Type cannot be null");
   }
 
@@ -67,7 +73,9 @@ class TransactionTest {
     var exception =
         assertThrows(
             NullPointerException.class,
-            () -> Transaction.create(money, TransactionType.CREDIT, null, externalReference));
+            () ->
+                Transaction.create(
+                    money, TransactionType.CREDIT, ACCOUNT_ID, null, externalReference));
     assertThat(exception.getMessage()).isEqualTo("OccurredAt cannot be null");
   }
 
@@ -78,7 +86,7 @@ class TransactionTest {
     var exception =
         assertThrows(
             NullPointerException.class,
-            () -> Transaction.create(money, TransactionType.CREDIT, OCCURRED_AT, null));
+            () -> Transaction.create(money, TransactionType.CREDIT, ACCOUNT_ID, OCCURRED_AT, null));
     assertThat(exception.getMessage()).isEqualTo("ExternalReference cannot be null");
   }
 
@@ -86,7 +94,8 @@ class TransactionTest {
   void shouldProcessTransactionSuccessfully() {
     var money = new Money(BigDecimal.valueOf(100), Currency.BRL);
     var transaction =
-        Transaction.create(money, TransactionType.CREDIT, OCCURRED_AT, "account-service::123");
+        Transaction.create(
+            money, TransactionType.CREDIT, ACCOUNT_ID, OCCURRED_AT, "account-service::123");
 
     var result = transaction.process();
 
@@ -102,10 +111,11 @@ class TransactionTest {
         Transaction.restore(
             TransactionID.random(),
             new Money(BigDecimal.valueOf(100), Currency.BRL),
-            TransactionStatus.PROCESSED,
             TransactionType.CREDIT,
+            ACCOUNT_ID,
             OCCURRED_AT,
             CREATED_AT,
+            TransactionStatus.PROCESSED,
             "ref-123");
 
     var result = transaction.process();
